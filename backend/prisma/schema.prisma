@@ -3,11 +3,43 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
+// Cấu hình Generator - "Xưởng sản xuất" code client
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
+// Cấu hình Datasource - "Địa chỉ" nhà kho dữ liệu 
 datasource db {
   provider = "postgresql"
+}
+
+// Định nghĩa Enum - Tập hợp các giá trị cố định 
+enum Role{
+  ADMIN
+  MEMBER
+}
+
+// Model User - "Bản vẽ" của bảng người dùng
+model User{
+  // UUID giúp định danh khó đoán và an toàn hơn ID tự tăng (1, 2, 3)
+  id  String  @id @default(uuid())
+  // @unique đảm bảo không bao giờ có 2 người trùng email
+  email String  @unique
+  //  @map giúp đặt tên field trong code camelCase nhưng DB là snake_case
+  passwordHash  String  @map("password_hash")
+  // Dấu ? nghĩa là Optional (có thể để trống)
+  fullname  String? @map("fullname")
+  // Mặc định mọi người đăng ký là MEMBER
+  role  Role  @default(MEMBER)
+  // Quản lý trạng thái
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  refreshTokenVersion Int @default(1) @map("refresh_token_version")
+  // Thời gian hệ thống
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  // Dùng cho Soft Delete
+  deletedAt  DateTime?  @map("deleted_at")
+
+  @@map("users") // Tên bảng trong db 
 }
