@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
+import authRoutes from './modules/auth/auth.routes';
 
 // Khởi tạo cấu hình biến môi trường 
 dotenv.config();
@@ -18,12 +19,16 @@ app.use(cors());
 // Tăng cường bảo mật bằng cách thiết lập HTTP headers 
 app.use(helmet());
 
+app.use('/api/v1/auth', authRoutes);
+
 // Route mặc định
 app.get('/', (req: Request, res: Response) => {
     res.json({
         message: 'NexTask API is running with TypeScript!'
     });
 });
+
+
 
 
 
