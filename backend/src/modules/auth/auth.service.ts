@@ -1,5 +1,5 @@
 // Xử lý logic nghiệp vụ: hash pass, gọi DB, 
-import { PrismaClient, Role } from "../../generated/prisma";
+import prisma from '../../lib/prisma';
 import bcrypt from 'bcrypt';
 import AppError from "../../utils/appError";
 
@@ -7,7 +7,7 @@ import AppError from "../../utils/appError";
 export class AuthService {
     async register(data: any) {
         
-        const prisma = new PrismaClient();
+      
         const { email, password, fullname } = data;
         // TODO B1: Tìm user theo email sử dụng prisma.user.findUnique
         const existingUser = await prisma.user.findUnique({ where: { email }});

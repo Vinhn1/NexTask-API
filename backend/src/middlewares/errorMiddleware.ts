@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError from '../utils/appError';
 
 const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
     //  Lấy statusCode và status từ err, nếu không có thì mặc định (500 và 'error')

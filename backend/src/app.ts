@@ -1,13 +1,13 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
-import AppError from './utils/appError';
-import dotenv from 'dotenv'; 
+import authRoutes from './modules/auth/auth.routes';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
-import authRoutes from './modules/auth/auth.routes';
+
 
 // Khởi tạo cấu hình biến môi trường 
-dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
