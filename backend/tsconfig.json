@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                                  /* Phiên bản JS đích */
+    "module": "commonjs",                                /* Hệ thống module cho Node.js */
+    "rootDir": "./src",                                  /* Thư mục chứa code TS */
+    "outDir": "./dist",                                  /* Thư mục chứa code JS sau khi build */
+    "esModuleInterop": true,                             /* Giúp import các module JS cũ dễ dàng hơn */
+    "forceConsistentCasingInFileNames": true,            /* Tránh lỗi phân biệt chữ hoa/thường trên Windows/Linux */
+    "strict": true,                                      /* Bật chế độ kiểm tra lỗi nghiêm ngặt */
+    "skipLibCheck": true                                 /* Bỏ qua kiểm tra các file thư viện để chạy nhanh hơn */
+  },
+  "include": ["src/**/*", "src/app.ts"],                               /* Chỉ biên dịch code trong src */
+  "exclude": ["node_modules"]                            /* Bỏ qua node_modules */
+}

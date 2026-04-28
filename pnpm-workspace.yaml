@@ -1,0 +1,4 @@
+packages:
+- 'backend'
+- 'frontend'
+- 'shared' # Dùng để chia sẻ code giữa 2 bên 
