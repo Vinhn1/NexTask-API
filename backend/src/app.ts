@@ -25,10 +25,7 @@ app.get('/', (req: Request, res: Response) => {
     });
 });
 
-// app.get('/test-error', (req, res, next) => {
-//     // Ném lỗi vào vòng tay của Error Middleware bằng cách gọi next(err)
-//     next(new AppError('Đang có lỗi xảy ra!', 400));
-// });
+
 
 // Gắn Error Middleware 
 app.use(globalErrorHandler);
