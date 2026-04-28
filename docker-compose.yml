@@ -1,0 +1,16 @@
+version: '3.8' # phiên bản docker Compose 
+services:
+  db: # Tên dịch vụ 
+    image: postgres:15-alpine # Sử dụng bản postgres nhẹ nhất
+    restart: always # Tự khởi động lại nếu bị lỗi
+    environment:
+        POSTGRES_USER: ${DB_USER} # Lấy từ .env
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5432:5432' # Ánh xạ cổng (Máy thật: Container)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Lưu dữ liệu bền vũng
+    
+volumes:
+  postgres_data: # Khai báo volume để không bị mất dữ liệu khi xóa container
