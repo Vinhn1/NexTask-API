@@ -69,7 +69,10 @@ export class AuthService {
 
         // Tạo refreshToken (Dài hạn - 7 ngày)
         const refreshToken = jwt.sign(
-            {userId: user.id},
+            {
+                userId: user.id,
+                version: user.refreshTokenVersion
+            },
             process.env.JWT_REFRESH_TOKEN as string,
             {expiresIn: '7d'}
         )
@@ -83,7 +86,43 @@ export class AuthService {
             accessToken, 
             refreshToken
         }
+    }
 
+    async getMe(userId: string){
+        // Tìm user trong DB theo ID 
+        const user = await prisma.user.findUnique({
+            where: { id: userId},
+            // Dùng select để chỉ lấy các trường cần thiết 
+            select: {
+                id: true,
+                email: true,
+                fullname: true,
+                role: true,
+                createdAt: true
+            }
+        });
+
+        // Kiểm tra nếu không tìm thấy user 
+        if(!user){
+            throw new AppError('Người dùng không tồn tại!', 404);
+        }
+
+        return user;
+    }
+
+    async logout(userId: string){
+        // Dùng prisma.user.update để tăng refreshTokenVersion lên 1 đơn vị 
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                refreshTokenVersion: {
+                    increment: 1
+                }
+            }
+        });
+        return {
+            message: 'Đăng xuất thành công!'
+        };
     }
 }
 

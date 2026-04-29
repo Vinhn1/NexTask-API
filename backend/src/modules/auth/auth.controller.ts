@@ -43,6 +43,45 @@ export class AuthController {
             next(error);
         }
     }
+
+    async getMe(req: Request, res: Response, next: NextFunction){
+        try{
+
+            //  Lấy id từ "con dấu" mà Middleware protect đã để lại 
+            const userId = (req as any).user.id;
+
+            // Gọi service để lấy thông tin chi tiết User từ DB 
+            const user = await authService.getMe(userId);
+
+            // Trả về kết quả 
+            res.status(200).json({
+                status: 'success',
+                data: { user }
+            });
+        }catch(error){
+            next(error);
+        }
+    }
+
+    async logout(req: Request, res: Response, next: NextFunction){
+        try{
+            // Lấy userId từ token (đã được middleware protect xử lý)
+            const userId = (req as any).user.id;
+
+            // Gọi Service để thực hiện logic logout (tăng version token DB)
+            const result = await authService.logout(userId);
+
+            // Trả về phản hồi cho Client 
+            res.status(200).json({
+                status: 'success',
+                message: result.message
+            });
+
+        }catch(error){
+            next(error);
+        }
+
+    }
 }
 
 export const authController = new AuthController();
