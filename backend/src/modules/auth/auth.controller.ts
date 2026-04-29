@@ -1,6 +1,6 @@
 // Nơi tiếp nhận Request và gửi Response (Lễ tân)
 import { Request, Response, NextFunction } from 'express';
-import { authService, AuthService } from './auth.service';
+import { authService } from './auth.service';
 
 export class AuthController {
     async register(req: Request, res: Response, next: NextFunction) {
@@ -21,6 +21,25 @@ export class AuthController {
 
         }catch(error){
             // Nếu có lỗi (email trùng, lỗi DB... ), đẩy lỗi sang Middleware xử lý 
+            next(error);
+        }
+    }
+
+    // Login
+    async login(req: Request, res: Response, next: NextFunction){
+        try{
+
+            //  Gọi service 
+            const result = await authService.login(req.body);
+
+            // Trả về response
+            res.status(200).json({
+                status: 'success',
+                message: 'Đăng nhập thành công',
+                data: result
+            }) 
+
+        }catch(error){
             next(error);
         }
     }
