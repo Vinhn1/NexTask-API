@@ -42,4 +42,25 @@ model User{
   deletedAt  DateTime?  @map("deleted_at")
 
   @@map("users") // Tên bảng trong db 
+
+  ownedProjects Project[] @relation("ProjectOwner")
+  memberProjects Project[]  @relation("ProjectMembers")
+}
+
+
+// Model Project  là container chứa các Task.
+model Project{
+  id  String @id @default(uuid())
+  title String @map("title")
+  description String? @map("description")
+  ownerId String @map("owner_id")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt  @map("updated_at")
+
+  @@map("projects")
+
+  owner User @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members User[]  @relation("ProjectMembers")
+
 }
