@@ -55,7 +55,58 @@ export class ProjectService {
     }
 
     // Update
+    async updateProject(projectId: string, userId: string, data: Partial<CreateProjectDTO>) {
+        // Tìm project hiện tại
+        const existingProject = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
+        // Kiểm tra project có tồn tại không 
+        if(!existingProject){
+            throw new AppError('Không tìm thấy dự án', 404);
+        }
+
+        // Kiểm tra quyền sở hữu 
+        if(existingProject.ownerId !== userId){
+            throw new AppError(
+                "Bạn không có quyền sửa dự án này", 403
+            );
+        }
+
+        // Nếu user muốn sửa title
+        if(data.title){
+            // Kiểm tra title có bị trùng không 
+            const duplicateProject = await prisma.project.findFirst({
+                where: {
+                    title: data.title,
+                    ownerId: userId,
+                    // Không kiểm tra chính project hiện tại
+                    NOT: {
+                        id: projectId
+                    }
+                }
+            });
+
+            // Nếu bị trùng
+            if(duplicateProject){
+                throw new AppError("Tên dự án đã tồn tại", 409);
+            }
+        }
+
+        // Update project
+        const updateProject = await prisma.project.update({
+            where: {
+                id: projectId
+            },
+            data: {
+                title: data.title,
+                description: data.description
+            }
+        });
+
+        // Trả về dữ liệu mới
+        return updateProject;
+    }
 
     // Delete 
 }
