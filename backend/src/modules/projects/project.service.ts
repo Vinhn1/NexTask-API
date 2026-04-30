@@ -1,8 +1,6 @@
-import { PrismaClient } from "../../generated/prisma";
 import AppError from "../../utils/appError";
 import { CreateProjectDTO } from "./project.dto";
-
-const prisma = new PrismaClient();
+import prisma from '../../lib/prisma';
 
 // Gọi DB Project, Thực thi "Luật chơi" -> Chỉ chủ dự án mới được quyền sửa dự án...
 // Xử lý dữ liệu 
@@ -40,3 +38,5 @@ export class ProjectService {
 
     }  
 }
+
+export const projectService = new ProjectService();
