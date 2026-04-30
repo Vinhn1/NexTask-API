@@ -12,4 +12,8 @@ router.post('/', protect, projectController.create);
 // GET
 // Lấy toàn bộ danh sách project của user 
 router.get('/', protect, projectController.getAll);
+
+// PATCH (Sửa 1 phần)
+router.patch('/:id', protect, projectController.update);
+
 export default router;

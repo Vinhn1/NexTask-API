@@ -46,6 +46,30 @@ export class ProjectController {
     }
 
     // Update
+    async update(req: Request, res: Response, next: NextFunction){
+        try{
+
+            // Lấy project ID
+            const { id } = req.params;
+
+            // Lấy dữ liệu
+            const data = req.body;
+
+            // Lấy User ID
+            const userId = req.user!.id;
+
+            // Gọi service 
+            const project = await projectService.updateProject(id, userId, data);
+
+            // Trả về res
+            res.status(200).json({
+                status: 'success',
+                data: { project }
+            })
+        }catch(error){
+            next(error);
+        }
+    }
 
 
     // Delete 
