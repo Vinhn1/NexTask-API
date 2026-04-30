@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import authRoutes from './modules/auth/auth.routes';
+import projectRoutes from './modules/projects/project.routes';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
@@ -20,6 +21,7 @@ app.use(cors());
 app.use(helmet());
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/projects', projectRoutes);
 
 // Route mặc định
 app.get('/', (req: Request, res: Response) => {
