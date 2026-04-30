@@ -32,4 +32,37 @@ export class TaskService {
             }
         })
     }
+
+    // GetALL Task 
+    async getAllTasksByProject(projectId: string, userId: string){
+        // Kiểm tra xem user có quyền xem project này không 
+        const project = await prisma.project.findFirst({
+            where: {
+                id: projectId,
+                deletedAt: null,
+                 OR: [
+                    // Là chủ project
+                    { ownerId: userId },
+                    // Hoặc là thành viên
+                    { members: {some: { id: userId}}}
+                ]
+            }
+        })
+
+        if(!project){
+            throw new AppError("Project không tồn tại hoặc bạn không có quyền truy cập", 404);
+        }
+
+        // Nếu có quyền mới đi lấy Task 
+        return await prisma.task.findMany({
+            where: {
+                projectId: projectId,
+                deletedAt: null
+            },
+            orderBy: {
+                createdAt: 'desc' // Sắp xếp cái mới nhất lên đầu 
+            }
+        })
+
+    }
 }

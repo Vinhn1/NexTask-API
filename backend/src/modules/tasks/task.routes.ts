@@ -9,5 +9,8 @@ const taskController = new TaskController();
 // POST / (create)
 router.post('/', protect, taskController.createTask);
 
+// GET 
+router.get('/:projectId', protect, taskController.getTasks);
+
 
 export default router;

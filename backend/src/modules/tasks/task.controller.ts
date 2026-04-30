@@ -23,4 +23,19 @@ export class TaskController {
             data: newTask
         });
     });
+
+    // Lấy danh sách Task
+    getTasks = catchAsync(async (req: Request, res: Response) => {
+        const { projectId } = req.params;
+        const userId = req.user!.id;
+
+        const tasks = await taskService.getAllTasksByProject(projectId, userId);
+
+        res.status(200).json({
+            status: 'success',
+            result: tasks.length,
+            data: tasks
+
+        })
+    })
 }
