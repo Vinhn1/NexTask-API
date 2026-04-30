@@ -112,4 +112,47 @@ export class TaskService {
             }
         });
     }
+
+    // Delete
+    async deleteTask(taskId: string, userId: string){
+        // Tìm task kèm theo thông tin Project của nó 
+        const task = await prisma.task.findFirst({
+            where: {
+                id: taskId,
+                deletedAt: null
+            },
+            // Lấy luôn thông tin Project để check quyền 
+            include: {
+                project: {
+                    include: {
+                        members: {
+                            where: {
+                                // Chỉ lấy thành viên nếu Id khớp với user đang đăng nhập 
+                                id: userId
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if(!task){
+            throw new AppError("Không tìm thấy Task", 404);
+        }
+        
+        // Check quyền: User có thuộc Project của Task này không?
+        const isOwner = task.project.ownerId === userId;
+        // Kiểm tra trong mảng members
+        const isMember = task.project.members.length > 0;
+
+        if(!isOwner && !isMember)
+            throw new AppError("Bạn không có quyền", 403) ;
+
+        return await prisma.task.update({
+            where: { id: taskId },
+            data: {
+                deletedAt: new Date()
+            }
+        })
+    }
 }

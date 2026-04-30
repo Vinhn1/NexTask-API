@@ -16,4 +16,7 @@ router.get('/:projectId', protect, taskController.getTasks);
 // PATCH updateTask
 router.patch('/:taskId', protect, taskController.updateTask);
 
+// DELETE 
+router.delete('/:taskId', protect, taskController.deleteTask);
+
 export default router;

@@ -59,4 +59,17 @@ export class TaskController {
             data: task
         });
     })
+
+    // Delete 
+    deleteTask = catchAsync(async (req: Request, res: Response) => {
+        // Lấy taskId từ params
+        const { taskId } = req.params;
+        // Lấy userId từ user 
+        const userId = req.user!.id;
+
+        // gọi service
+        await taskService.deleteTask(taskId, userId);
+
+        res.status(204).send();
+    })
 }
