@@ -16,4 +16,7 @@ router.get('/', protect, projectController.getAll);
 // PATCH (Sửa 1 phần)
 router.patch('/:id', protect, projectController.update);
 
+// DELETE 
+router.delete('/:id', protect, projectController.delete);
+
 export default router;

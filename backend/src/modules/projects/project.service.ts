@@ -56,59 +56,100 @@ export class ProjectService {
 
     // Update
     async updateProject(projectId: string, userId: string, data: Partial<CreateProjectDTO>) {
-        // Tìm project hiện tại
-        const existingProject = await prisma.project.findUnique({
-            where: { id: projectId }
-        });
+        try{
 
-        // Kiểm tra project có tồn tại không 
-        if(!existingProject){
-            throw new AppError('Không tìm thấy dự án', 404);
-        }
+            // Tìm project hiện tại
+            const existingProject = await prisma.project.findUnique({
+                where: { id: projectId }
+            });
 
-        // Kiểm tra quyền sở hữu 
-        if(existingProject.ownerId !== userId){
-            throw new AppError(
-                "Bạn không có quyền sửa dự án này", 403
-            );
-        }
+            // Kiểm tra project có tồn tại không 
+            if(!existingProject){
+                throw new AppError('Không tìm thấy dự án', 404);
+            }
 
-        // Nếu user muốn sửa title
-        if(data.title){
-            // Kiểm tra title có bị trùng không 
-            const duplicateProject = await prisma.project.findFirst({
-                where: {
-                    title: data.title,
-                    ownerId: userId,
-                    // Không kiểm tra chính project hiện tại
-                    NOT: {
-                        id: projectId
+            // Kiểm tra quyền sở hữu 
+            if(existingProject.ownerId !== userId){
+                throw new AppError(
+                    "Bạn không có quyền sửa dự án này", 403
+                );
+            }
+
+            // Nếu user muốn sửa title
+            if(data.title){
+                // Kiểm tra title có bị trùng không 
+                const duplicateProject = await prisma.project.findFirst({
+                    where: {
+                        title: data.title,
+                        ownerId: userId,
+                        // Không kiểm tra chính project hiện tại
+                        NOT: {
+                            id: projectId
+                        }
                     }
+                });
+
+                // Nếu bị trùng
+                if(duplicateProject){
+                    throw new AppError("Tên dự án đã tồn tại", 409);
+                }
+            }
+
+            // Update project
+            const updateProject = await prisma.project.update({
+                where: {
+                    id: projectId
+                },
+                data: {
+                    title: data.title,
+                    description: data.description
                 }
             });
 
-            // Nếu bị trùng
-            if(duplicateProject){
-                throw new AppError("Tên dự án đã tồn tại", 409);
-            }
+            // Trả về dữ liệu mới
+            return updateProject;
+
+        }catch(error){
+            throw error;
         }
-
-        // Update project
-        const updateProject = await prisma.project.update({
-            where: {
-                id: projectId
-            },
-            data: {
-                title: data.title,
-                description: data.description
-            }
-        });
-
-        // Trả về dữ liệu mới
-        return updateProject;
     }
 
     // Delete 
+    async deleteProject(projectId: string, userId: string){
+        try{
+             // Tìm Project 
+            const existingProject = await prisma.project.findUnique({
+                where: {
+                    id: projectId
+                }
+            })
+
+            // Kiểm tra tồn tại 
+            if(!existingProject){
+                throw new AppError("Không tìm thấy dự án", 404);
+            }
+
+            // Kiểm tra quyền sở hữu 
+            if(existingProject.ownerId !== userId){
+                throw new AppError("Bạn không có quyền xóa dự án này", 403);
+            }
+
+            // Delete 
+            await prisma.project.delete({
+                where: {
+                    id: projectId
+                }
+            })
+
+            // return res 
+            return {
+                message: "Xóa dự án thành công"
+            }
+        }catch(error){
+            throw error;
+        }
+       
+    }
 }
 
 export const projectService = new ProjectService();

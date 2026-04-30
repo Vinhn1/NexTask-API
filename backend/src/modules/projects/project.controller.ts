@@ -73,4 +73,23 @@ export class ProjectController {
 
 
     // Delete 
+    async delete(req: Request, res: Response, next: NextFunction){
+        try{
+            // Lấy id từ params 
+            const { id } = req.params;
+
+            // Lấy userId 
+            const userId = req.user!.id;
+
+            // Gọi service 
+            const result = await projectService.deleteProject(id, userId);
+
+            res.status(200).json({
+                status: 'success',
+                ...result
+            })
+        }catch(error){
+            next(error);
+        }
+    }
 }
