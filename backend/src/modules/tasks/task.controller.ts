@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { TaskService } from './task.service';
 import { catchAsync } from '../../utils/catchAsync';
-import { createTaskSchema } from './task.dto';
+import { createTaskSchema, updateTaskSchema } from './task.dto';
 
 
 const taskService = new TaskService();
@@ -37,5 +37,26 @@ export class TaskController {
             data: tasks
 
         })
+    })
+
+    // Update
+    updateTask = catchAsync(async (req: Request, res: Response) => {
+        // Lấy TaskId
+        const { taskId } = req.params;
+
+        // Lấy UserId
+        const userId = req.user!.id;
+
+        // Validate body với updateTaskSchema
+        const validatedData =  updateTaskSchema.parse(req.body);
+
+        // Gọi Service
+        const task = await taskService.updateTask(taskId, userId, validatedData);
+
+        // Trả về res
+        res.status(200).json({
+            status: 'success',
+            data: task
+        });
     })
 }

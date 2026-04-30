@@ -23,4 +23,7 @@ export const createTaskSchema = z.object({
 
 });
 
+export const updateTaskSchema = createTaskSchema.partial();
+
 export type CreateTaskDto = z.infer<typeof createTaskSchema>;
+export type UpdateTaskDto = z.infer<typeof updateTaskSchema>;
