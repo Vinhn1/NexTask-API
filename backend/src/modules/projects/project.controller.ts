@@ -24,4 +24,29 @@ export class ProjectController {
             next(error);
         }
     }
+
+    async getAll(req: Request, res: Response, next: NextFunction) {
+        try{
+            // Lấy userId
+            // Vì chúng ta khai báo user? là optional trong file .d.ts, nên bạn cần dùng dấu ! (nếu chắc chắn có user) hoặc kiểm tra if.
+            const userId = req.user!.id;
+
+            // Gọi Service
+            const projects = await projectService.getUserProjects(userId);
+
+            // Trả về res 
+            res.status(200).json({
+                status: 'success',
+                result: projects.length, // Trả về số lượng để frontend dễ làm việc 
+                data: { projects }
+            })
+        }catch(error){
+            next(error);
+        }
+    }
+
+    // Update
+
+
+    // Delete 
 }

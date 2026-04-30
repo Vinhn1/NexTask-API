@@ -6,6 +6,7 @@ import prisma from '../../lib/prisma';
 // Xử lý dữ liệu 
 // Tái sử dụng 
 export class ProjectService {
+    // Tạo mới project
     async createProject(data: CreateProjectDTO) {
         try{
 
@@ -37,6 +38,26 @@ export class ProjectService {
         }
 
     }  
+
+    // Lấy danh sách project (User chỉ xem được project của chính họ)
+    async getUserProjects(userId: string) {
+        // Lấy toàn bộ list project của user đã đăng nhập 
+        try{
+            // findMany -> Lấy nhiều record 
+            return await prisma.project.findMany({
+                // CHỈ lấy project thuộc về user hiện tại
+                where:  { ownerId: userId }
+            })
+        }catch(error){  
+            throw error;
+        }
+
+    }
+
+    // Update
+
+
+    // Delete 
 }
 
 export const projectService = new ProjectService();
