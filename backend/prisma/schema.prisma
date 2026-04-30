@@ -74,6 +74,7 @@ model Project{
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt  @map("updated_at")
+  deletedAt  DateTime?  @map("deleted_at")
 
   @@map("projects")
 
@@ -91,6 +92,7 @@ model Task{
   dueDate DateTime? @map("due_date")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt  @map("updated_at")
+  deletedAt  DateTime?  @map("deleted_at")
 
   // Quan hệ 1-n với User (Người thực hiện)
   assigneeId  String? @map("assignee_id")

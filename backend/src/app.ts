@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import authRoutes from './modules/auth/auth.routes';
 import projectRoutes from './modules/projects/project.routes';
+import taskRoutes from './modules/tasks/task.routes';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
@@ -22,6 +23,7 @@ app.use(helmet());
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
+app.use('/api/v1/tasks', taskRoutes);
 
 // Route mặc định
 app.get('/', (req: Request, res: Response) => {
