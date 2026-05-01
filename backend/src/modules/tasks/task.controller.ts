@@ -28,13 +28,19 @@ export class TaskController {
     getTasks = catchAsync(async (req: Request, res: Response) => {
         const { projectId } = req.params;
         const userId = req.user!.id;
+        const { status, priority } = req.query;
+
+        const filters = {
+            status: status as string,
+            priority: priority as string
+        }
 
         // Lấy và ép kiểu page, limit
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 10;
 
         // Gọi Service với 4 tham số
-        const result = await taskService.getAllTasksByProject(projectId, userId, page, limit);
+        const result = await taskService.getAllTasksByProject(projectId, userId, page, limit, filters);
 
         // Trả về kết quả 
         res.status(200).json({

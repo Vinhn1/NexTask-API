@@ -34,10 +34,21 @@ export class TaskService {
     }
 
     // GetALL Task 
-    async getAllTasksByProject(projectId: string, userId: string, page: number = 1, limit: number = 10){
+    async getAllTasksByProject(projectId: string, userId: string, page: number = 1, limit: number = 10, filters: {
+        status?: string,
+        priority?: string
+    } = {}){
 
         const skip = (page - 1) * limit;
         const take = limit;
+
+        // Tạo obj điều kiện lọc cho Prisma
+        const whereCondition: any = {
+            projectId,
+            deletedAt: null,
+            // Rải các filter vào 
+            ...filters
+        };
 
         // Kiểm tra xem user có quyền xem project này không 
         const project = await prisma.project.findFirst({
@@ -60,10 +71,7 @@ export class TaskService {
         // Nếu có quyền mới đi lấy Task 
         const [tasks, total] = await Promise.all([
             prisma.task.findMany({
-                where: {
-                    projectId,
-                    deletedAt: null
-                },
+                where: whereCondition,
                 skip: skip,
                 take: take,
                 orderBy: {
@@ -71,10 +79,7 @@ export class TaskService {
                 }
             }),
             prisma.task.count ({
-                where: {
-                    projectId,
-                    deletedAt: null
-                }
+                where: whereCondition
             })
         ]);
 
