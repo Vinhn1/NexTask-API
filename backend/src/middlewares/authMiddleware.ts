@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/appError';
+import prisma from '../lib/prisma';
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
     try{
@@ -23,9 +24,19 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
         // Payload trả về sẽ chứa thông tin userId mà đã ký lúc login 
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN as string) as any;
 
-        // Nếu thông tin user vào request để các hàm sau sử dụng 
-        // Ép kiểu req thành any để tránh lỗi TypeScript 
-        (req as any).user = { id: decoded.userId };
+        const currentUser = await prisma.user.findUnique({
+            where: {
+                id: decoded.userId
+            }
+        });
+
+        // Kiểm tra xem user có thực sự tồn tại không 
+        if(!currentUser){
+            return next(new AppError('Người dùng sở hữu token này không còn tồn tại!', 401));
+        }
+
+        // Gán user từ DB vào req.user để các hàm sau (phân quyền) có thể dùng role
+        req.user = currentUser;
 
         // Cho phép req đi tiếp 
         next();
