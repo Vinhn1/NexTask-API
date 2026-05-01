@@ -15,9 +15,9 @@ export const validate = (schema: AnyZodObject) => {
             });
 
             // Gán ngược lại để Controller nhận được dữ liệu "sạch" và đúng kiểu
-            req.body = result.body;
-            req.query = result.query;
-            req.params = result.params;
+            Object.assign(req.body, result.body);
+            Object.assign(req.query, result.query);
+            Object.assign(req.params, result.params);
 
             // Nếu validate thành công -> cho request đi tiếp 
             next();

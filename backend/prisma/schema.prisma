@@ -45,6 +45,7 @@ model User{
   passwordHash  String  @map("password_hash")
   // Dấu ? nghĩa là Optional (có thể để trống)
   fullname  String? @map("fullname")
+  avatar    String?  @map("avatar") 
   // Mặc định mọi người đăng ký là MEMBER
   role  Role  @default(MEMBER)
   // Quản lý trạng thái
