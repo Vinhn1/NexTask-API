@@ -29,13 +29,18 @@ export class TaskController {
         const { projectId } = req.params;
         const userId = req.user!.id;
 
-        const tasks = await taskService.getAllTasksByProject(projectId, userId);
+        // Lấy và ép kiểu page, limit
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
 
+        // Gọi Service với 4 tham số
+        const result = await taskService.getAllTasksByProject(projectId, userId, page, limit);
+
+        // Trả về kết quả 
         res.status(200).json({
             status: 'success',
-            result: tasks.length,
-            data: tasks
-
+            data: result.tasks,
+            pagination: result.pagination
         })
     })
 

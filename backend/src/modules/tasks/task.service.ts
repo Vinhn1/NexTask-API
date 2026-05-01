@@ -34,7 +34,11 @@ export class TaskService {
     }
 
     // GetALL Task 
-    async getAllTasksByProject(projectId: string, userId: string){
+    async getAllTasksByProject(projectId: string, userId: string, page: number = 1, limit: number = 10){
+
+        const skip = (page - 1) * limit;
+        const take = limit;
+
         // Kiểm tra xem user có quyền xem project này không 
         const project = await prisma.project.findFirst({
             where: {
@@ -54,15 +58,36 @@ export class TaskService {
         }
 
         // Nếu có quyền mới đi lấy Task 
-        return await prisma.task.findMany({
-            where: {
-                projectId: projectId,
-                deletedAt: null
-            },
-            orderBy: {
-                createdAt: 'desc' // Sắp xếp cái mới nhất lên đầu 
+        const [tasks, total] = await Promise.all([
+            prisma.task.findMany({
+                where: {
+                    projectId,
+                    deletedAt: null
+                },
+                skip: skip,
+                take: take,
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            }),
+            prisma.task.count ({
+                where: {
+                    projectId,
+                    deletedAt: null
+                }
+            })
+        ]);
+
+        // Trả về kết quả kèm metadata
+        return {
+            tasks,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
             }
-        })
+        };
 
     }
 
