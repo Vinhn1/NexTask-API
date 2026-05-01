@@ -1,22 +1,23 @@
 import { Router } from 'express';
 import { TaskController } from './task.controller';
 import { protect } from '../../middlewares/authMiddleware';
-import router from '../auth/auth.routes';
+import { validate } from '../../middlewares/validate';
+import { createTaskSchema, updateTaskSchema } from './task.dto';
 
 const router = Router();
 const taskController = new TaskController();
 
 // POST / (create)
-router.post('/', protect, taskController.createTask);
+router.post('/', protect, validate(createTaskSchema), taskController.createTask);
 
 // GET  getTask
 router.get('/:projectId', protect, taskController.getTasks);
 
 
 // PATCH updateTask
-router.patch('/:taskId', protect, taskController.updateTask);
+router.patch('/:id', protect, validate(updateTaskSchema), taskController.updateTask);
 
 // DELETE 
-router.delete('/:taskId', protect, taskController.deleteTask);
+router.delete('/:id', protect, taskController.deleteTask);
 
 export default router;
