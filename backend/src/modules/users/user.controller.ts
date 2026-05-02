@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { catchAsync } from '../../utils/catchAsync';
 import { AppError } from '../../utils/appError';
 import { userService } from './user.service';
+import { deleteFile } from '../../utils/file.util';
 
 export class UserController {
     updateAvatar = catchAsync(async (req: Request, res: Response) => {
@@ -11,12 +12,21 @@ export class UserController {
         }
 
         // Tạo đường dẫn ảnh (/pubic/images/${req.file.filename})
-        const avatarPath = `/public/images/${req.file.filename}`;
+        const avatarPath = `/images/${req.file.filename}`;
         const userId = req.user!.id;
+
+        // Tìm user hiện tại trong DB để lấy cái avatar Cũ 
+        const currentUser = await userService.getUserById(userId);
+        const oldAvatar = currentUser.avatar;
 
         // Gọi userService.updateAvatar với:
         // userId (lấy từ req.user!.id) và avatarPath vừa tạo
         const user = await userService.updateAvatar(userId, avatarPath);
+
+        // Nếu cập nhật DB thành công và user đó có avatar cũ, thì xóa nó đi 
+        if(oldAvatar){
+            deleteFile(oldAvatar);
+        }
 
         // Trả về res thành công 
         res.status(200).json({
