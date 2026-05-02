@@ -2,26 +2,27 @@ import { Request, Response } from 'express';
 import { TaskService } from './task.service';
 import { catchAsync } from '../../utils/catchAsync';
 import { createTaskSchema, updateTaskSchema } from './task.dto';
+import { ApiResponse } from '../../utils/apiResponse';
 
 
 const taskService = new TaskService();
 
 export class TaskController {
     createTask = catchAsync(async (req: Request, res: Response) => {
-        // Validate dữ liệu từ client 
-        const validatedData = createTaskSchema.parse(req.body);
 
         // Lấy thông tin user hiện tại 
         const userId = req.user!.id;
 
         // Gọi Service để xử lý logic nghiệp vụ 
-        const newTask = await taskService.createTask(userId, validatedData);
+        const newTask = await taskService.createTask(userId, req.body);
 
         // Trả về kết quả 
-        res.status(201).json({
-            status: 'success',
-            data: newTask
-        });
+        return ApiResponse.success(
+            res,
+            'Tạo Task thành công',
+            newTask,
+            201
+        )
     });
 
     // Lấy danh sách Task
@@ -58,17 +59,17 @@ export class TaskController {
         // Lấy UserId
         const userId = req.user!.id;
 
-        // Validate body với updateTaskSchema
-        const validatedData =  updateTaskSchema.parse(req.body);
 
         // Gọi Service
-        const task = await taskService.updateTask(taskId, userId, validatedData);
+        const task = await taskService.updateTask(taskId, userId, req.body);
 
         // Trả về res
-        res.status(200).json({
-            status: 'success',
-            data: task
-        });
+        return ApiResponse.success(
+            res,
+            'Update Task thành công',
+            task,
+            200
+        )
     })
 
     // Delete 
