@@ -32,6 +32,19 @@ export class UserService {
             }
         });
     }
+
+    async getUserById(id: string){
+        const user = await prisma.user.findUnique({
+            where: {
+                id
+            }
+        });
+
+        if(!user)
+            throw new AppError('Người dùng không tồn tại', 404);
+
+        return user;
+    }
 }
 
 export const userService = new UserService();
