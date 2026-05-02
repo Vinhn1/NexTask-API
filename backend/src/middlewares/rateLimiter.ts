@@ -23,3 +23,23 @@ export const rateLimiter = rateLimit({
     // tắt các header cũ
     legacyHeaders: false    
 });
+
+
+export const authLimiter = rateLimit({
+    // 1 giờ
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: {
+        success: false,
+        statusCode: 429,
+        message: 'Bạn đã đăng nhập quá 5 lần, Vui lòng thử lại sau',
+        data: null,
+        errors: null
+    },
+
+        // Trả về rate limit trong header
+    standardHeaders: true,
+
+    // tắt các header cũ
+    legacyHeaders: false    
+})
