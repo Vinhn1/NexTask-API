@@ -6,6 +6,7 @@ import projectRoutes from './modules/projects/project.routes';
 import taskRoutes from './modules/tasks/task.routes';
 import userRouter from './modules/users/user.routes';
 import commentRouter from './modules/comments/comment.routes';
+import { rateLimiter } from './middlewares/rateLimiter';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
@@ -14,6 +15,8 @@ import globalErrorHandler from './middlewares/errorMiddleware';
 // Khởi tạo cấu hình biến môi trường 
 
 const app = express();
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware cơ bản 
@@ -25,6 +28,7 @@ app.use(cors());
 // Tăng cường bảo mật bằng cách thiết lập HTTP headers 
 app.use(helmet());
 
+app.use(rateLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/tasks', taskRoutes);
