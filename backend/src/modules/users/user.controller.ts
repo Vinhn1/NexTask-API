@@ -3,6 +3,7 @@ import { catchAsync } from '../../utils/catchAsync';
 import { AppError } from '../../utils/appError';
 import { userService } from './user.service';
 import { deleteFile } from '../../utils/file.util';
+import { ApiResponse } from '../../utils/apiResponse';
 
 export class UserController {
     updateAvatar = catchAsync(async (req: Request, res: Response) => {
@@ -29,11 +30,7 @@ export class UserController {
         }
 
         // Trả về res thành công 
-        res.status(200).json({
-            success: true,
-            message: 'Cập nhật avatar thành công.',
-            data: user
-        });
+        return ApiResponse.success(res, 'Cập nhật avatar thành công', user);
     });
 }
 
