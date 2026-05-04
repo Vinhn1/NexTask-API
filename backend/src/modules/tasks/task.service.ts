@@ -5,10 +5,14 @@ import { CreateTaskDto, UpdateTaskDto } from "./task.dto";
 export class TaskService {
     // Tạo mới Task 
     async createTask(userId: string, data: CreateTaskDto) {
+
+        const {projectId, dueDate, assigneeId, ...taskData } = data;
+
+
         //  Kiểm tra Project và Quyền hạn cùng lúc 
         const project = await prisma.project.findFirst({
             where: {
-                id: data.projectId,
+                id: projectId,
                 // Chỉ cho tạo task trong project chưa bị xóa mềm
                 deletedAt: null,
                 OR: [
@@ -27,8 +31,14 @@ export class TaskService {
         // Tiến hành tạo Task
         return await prisma.task.create({
             data: {
-                ...data,
-                dueDate: data.dueDate ? new Date(data.dueDate) : null,
+                ...taskData,
+                dueDate: dueDate ? new Date(dueDate) : null,
+                project: { 
+                    connect: {
+                        id: projectId
+                    }
+                },
+                ...(assigneeId && {assignee: {connect: {id: assigneeId}}})
             }
         })
     }
@@ -131,14 +141,18 @@ export class TaskService {
         if(!isOwner && !isMember)
             throw new AppError("Bạn không có quyền", 403) ;
 
-        // Tiến hành update
+        // Tiến hành update - trích xuất dueDate và projectId trước để tránh xung đột Prisma XOR type
+        const { dueDate: updateDueDate, projectId: updateProjectId, assigneeId: updateAssigneeId, ...updateData } = data;
         return await prisma.task.update({
             where: { id: taskId},
             data: {
-                // Copy các trường từ DTO sang 
-                ...data,
+                ...updateData,
                 // Riêng dueDate cần xử lý đặc biệt để Prisma hiểu kiểu Date
-                dueDate: data.dueDate ? new Date(data.dueDate) : undefined
+                ...(updateDueDate !== undefined && { dueDate: updateDueDate ? new Date(updateDueDate) : null }),
+                // Nếu có cập nhật project thì dùng connect
+                ...(updateProjectId && { project: { connect: { id: updateProjectId } } }),
+                // Nếu có cập nhật assignee thì dùng connect
+                ...(updateAssigneeId && { assignee: { connect: { id: updateAssigneeId } } }),
             }
         });
     }

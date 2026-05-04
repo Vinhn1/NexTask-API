@@ -17,7 +17,7 @@ import globalErrorHandler from './middlewares/errorMiddleware';
 const app = express();
 app.set('trust proxy', 1);
 
-const PORT = process.env.PORT || 5000;
+
 
 // Middleware cơ bản 
 // Để server hiểu được dữ liệu JSON từ request body
@@ -49,7 +49,4 @@ app.get('/', (req: Request, res: Response) => {
 // Gắn Error Middleware 
 app.use(globalErrorHandler);
 
-// Lắng nghe cổng
-app.listen(PORT, () => {
-    console.log(`Server is flying on http://localhost:${PORT}`);
-})
+export default app;

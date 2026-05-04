@@ -10,7 +10,7 @@ export class ProjectController {
             const { title, description } = req.body;
 
             //  Lấy id an toàn từ token 
-            const ownerId = req.user.id;
+            const ownerId = req.user!.id;
 
             //  Gom lại thành 1 obj DTO hoàn chỉnh gửi cho service 
             const project = await projectService.createProject({ title, description, ownerId });
@@ -29,7 +29,7 @@ export class ProjectController {
         try{
             // Lấy userId
             // Vì chúng ta khai báo user? là optional trong file .d.ts, nên bạn cần dùng dấu ! (nếu chắc chắn có user) hoặc kiểm tra if.
-            const userId = req.user!.id;
+            const userId = req.user!.id as string;
 
             // Gọi Service
             const projects = await projectService.getUserProjects(userId);
@@ -56,10 +56,10 @@ export class ProjectController {
             const data = req.body;
 
             // Lấy User ID
-            const userId = req.user!.id;
+            const userId = req.user!.id as string;
 
             // Gọi service 
-            const project = await projectService.updateProject(id, userId, data);
+            const project = await projectService.updateProject(id as string, userId, data);
 
             // Trả về res
             res.status(200).json({
@@ -79,10 +79,10 @@ export class ProjectController {
             const { id } = req.params;
 
             // Lấy userId 
-            const userId = req.user!.id;
+            const userId = req.user!.id as string;
 
             // Gọi service 
-            const result = await projectService.deleteProject(id, userId);
+            const result = await projectService.deleteProject(id as string, userId);
 
             res.status(200).json({
                 status: 'success',

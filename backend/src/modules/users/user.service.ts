@@ -1,5 +1,5 @@
 import prisma from "../../lib/prisma";
-import { AppError } from '../../utils/appError';
+import AppError  from '../../utils/appError';
 
 export class UserService {
     async updateAvatar(userId: string, avatarPath: string){

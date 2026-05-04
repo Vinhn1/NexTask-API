@@ -17,3 +17,9 @@ export const updateProjectSchema = z.object({
         description: z.string().optional(),
     }),
 });
+
+export interface CreateProjectDTO {
+    title: string;
+    description?: string;
+    ownerId: string;
+}

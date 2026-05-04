@@ -4,8 +4,8 @@
     "module": "commonjs",                                /* Hệ thống module cho Node.js */
     "rootDir": "./src",                                  /* Thư mục chứa code TS */
     "outDir": "./dist", 
-    // "types": ["node"],
-    // "typeRoots": ["./node_modules/@types"],              /* Thư mục chứa code JS sau khi build */
+    "types": ["node", "jest"],
+    "esModuleInterop": true,
     "esModuleInterop": true,                             /* Giúp import các module JS cũ dễ dàng hơn */
     "forceConsistentCasingInFileNames": true,            /* Tránh lỗi phân biệt chữ hoa/thường trên Windows/Linux */
     "strict": true,                                      /* Bật chế độ kiểm tra lỗi nghiêm ngặt */
