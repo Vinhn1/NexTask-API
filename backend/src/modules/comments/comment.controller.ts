@@ -29,7 +29,7 @@ export class CommentController {
         const { taskId } = req.params;
 
         // Gọi service
-        const comment = await commentService.getCommentsByTask(taskId);
+        const comment = await commentService.getCommentsByTask(taskId as string);
 
         // Trả về res
         return ApiResponse.success(
@@ -48,7 +48,7 @@ export class CommentController {
         const userId = req.user!.id;
 
         // Gọi service
-        const result = await commentService.deleteComment(commentId, userId);
+        const result = await commentService.deleteComment(commentId as string, userId);
 
         // Trả về res
         return ApiResponse.success(

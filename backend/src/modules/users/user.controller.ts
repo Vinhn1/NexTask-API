@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { catchAsync } from '../../utils/catchAsync';
-import { AppError } from '../../utils/appError';
+import  AppError  from '../../utils/appError';
 import { userService } from './user.service';
 import { deleteFile } from '../../utils/file.util';
 import { ApiResponse } from '../../utils/apiResponse';

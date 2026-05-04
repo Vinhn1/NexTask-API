@@ -41,7 +41,7 @@ export class TaskController {
         const limit = Number(req.query.limit) || 10;
 
         // Gọi Service với 4 tham số
-        const result = await taskService.getAllTasksByProject(projectId, userId, page, limit, filters);
+        const result = await taskService.getAllTasksByProject(projectId as string, userId, page, limit, filters);
 
         // Trả về kết quả 
         res.status(200).json({
@@ -61,7 +61,7 @@ export class TaskController {
 
 
         // Gọi Service
-        const task = await taskService.updateTask(taskId, userId, req.body);
+        const task = await taskService.updateTask(taskId as string, userId, req.body);
 
         // Trả về res
         return ApiResponse.success(
@@ -80,7 +80,7 @@ export class TaskController {
         const userId = req.user!.id;
 
         // gọi service
-        await taskService.deleteTask(taskId, userId);
+        await taskService.deleteTask(taskId as string, userId);
 
         res.status(204).send();
     })

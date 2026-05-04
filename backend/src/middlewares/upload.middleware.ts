@@ -1,6 +1,6 @@
 import multer from 'multer';
 import path from 'path';
-import { AppError } from '../utils/appError';
+import AppError from '../utils/appError';
 
 // Cấu hình Storage (Nơi lưu và Tên file)
 const storage = multer.diskStorage({

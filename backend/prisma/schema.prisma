@@ -6,7 +6,6 @@
 // Cấu hình Generator - "Xưởng sản xuất" code client
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 // Cấu hình Datasource - "Địa chỉ" nhà kho dữ liệu 
