@@ -47,12 +47,33 @@ export function AuthProvider({ children }){
 
     // HÀM ĐĂNG NHẬP
     const login = async (email, password) => {
-        // Gửi email và pass lên Server
-        const res = await axios.post('/api/v1/auth/login', { email, password });
-        // Server gửi về 1 cái chìa khóa mới (token) -> Lưu vào bộ nhớ trình duyệt
-        localStorage.setItem('accessToken', res.data.data.accessToken);
-        // Lưu thông tin người dùng vào 'user' để hiển thị lên giao diện (VD: chào bạn A)
-        setUser(res.data.data.user);
+        try {
+            // Gửi email và pass lên Server
+            const res = await axios.post('/api/v1/auth/login', { email, password });
+            // Server gửi về 1 cái chìa khóa mới (token) -> Lưu vào bộ nhớ trình duyệt
+            localStorage.setItem('accessToken', res.data.data.accessToken);
+            // Lưu thông tin người dùng vào 'user' để hiển thị lên giao diện (VD: chào bạn A)
+            setUser(res.data.data.user);
+        } catch (error) {
+            console.error("Login Error:", error.response?.data?.message || error.message);
+            throw error; // Quăng lỗi ra để UI xử lý (hiển thị thông báo cho user)
+        }
+    }
+
+    // HÀM ĐĂNG KÝ
+    const register = async (fullname, email, password) => {
+        try {
+            const res = await axios.post('/api/v1/auth/register', { fullname, email, password });
+            // Sau khi đăng ký thành công, thường Server sẽ trả về token luôn để login tự động
+            if (res.data.data.accessToken) {
+                localStorage.setItem('accessToken', res.data.data.accessToken);
+                setUser(res.data.data.user);
+            }
+            return res.data;
+        } catch (error) {
+            console.error("Register Error:", error.response?.data?.message || error.message);
+            throw error;
+        }
     }
 
     // HÀM ĐĂNG XUẤT
@@ -63,16 +84,20 @@ export function AuthProvider({ children }){
         setUser(null);
     }
 
-    // Trả về: Cung cấp tất cả dữ liệu (user, loading, login, logout) cho toàn bộ ứng dụng
+
+    // Trả về: Cung cấp tất cả dữ liệu (user, loading, login, register, logout) cho toàn bộ ứng dụng
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
             {/* 'children' chính là toàn bộ các component con của ứng dụng */}
             {children}
         </AuthContext.Provider>
     )
+
 }
 
 // TẠO LỐI TẮT ĐỀ LẤY DỮ LIỆU (CUSTOM HOOK)
 //  Thay vì mỗi lần dùng phải import 2 thứ, tạo ra hàm useAuth() dùng cho gọn
-export const useAuth = useContext(AuthContext);
+export const useAuth = () => {
+    return useContext(AuthContext);
+} 
 
