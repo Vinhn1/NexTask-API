@@ -1,11 +1,13 @@
 // react-router-dom: thư viện tạo ra ứng dụng SPA (Single Page Application)
 // Giúp trang web chuyển cảnh mượt mà mà không cần tải lại trang (F5)
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import AuthPage from './pages/AuthPage';
-import Dashboard from './pages/Dashboard';
+import { AuthPage } from './pages/AuthPage';
+import { Dashboard } from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css'
+import { ResetPassword } from './pages/ResetPassword';
+import HomePage from './pages/home/HomePage';
 
 function App() {
 
@@ -20,6 +22,9 @@ function App() {
         {/* Đăng ký, Đăng nhập -> Public */}
         <Route path='/auth' element={<AuthPage />} />
 
+        {/* Reset Pass */}
+        <Route path='/resetpass' element={<ResetPassword/>} />
+
         {/* Dashboard -> Private */}
         <Route element={<ProtectedRoute />}>
            <Route path="/dashboard" element={<Dashboard />}/>
@@ -27,7 +32,7 @@ function App() {
         </Route>
        
        {/* Navigate: Dùng để tự động chuyển hướng người dùng (ví dụ: đang ở / thì tự nhảy sang /dashboard). */}
-       <Route path="/" element={<Navigate to="dashboard" replace />} />
+       <Route path="/" element={<HomePage />} />
    
       </Routes>
       </BrowserRouter>

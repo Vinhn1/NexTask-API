@@ -28,7 +28,7 @@ export function AuthProvider({ children }){
             axios.get('/api/v1/auth/me', {
                 headers: {
                     // Gửi kèm token trong header theo chuẩn
-                    Authorization: `Bearer: ${token}`
+                    Authorization: `Bearer ${token}`
                 }
             })
             .then(
