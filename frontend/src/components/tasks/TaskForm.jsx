@@ -27,6 +27,11 @@ export default function TaskForm({ isOpen, onClose, projectId, onTaskCreated, pr
         projectId: projectId || formData.projectId, // Fallback if passed via props or state
       };
 
+      // Zod backend validate assigneeId là UUID — không được gửi chuỗi rỗng
+      if (!submissionData.assigneeId || submissionData.assigneeId.trim() === "") {
+        delete submissionData.assigneeId;
+      }
+
       if (submissionData.dueDate) {
         // Input type="date" returns YYYY-MM-DD. Convert to ISO format expected by backend.
         submissionData.dueDate = new Date(submissionData.dueDate).toISOString();

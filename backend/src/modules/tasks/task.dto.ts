@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 // ENUM cho độ ưu tiên
-export const priorityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH']);
-export const statusEnum = z.enum(['TODO', 'IN_PROGRESS', 'DONE']);
+export const priorityEnum = z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']);
+export const statusEnum = z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE']);
 
 // Định nghĩa Schema (Dùng validate lúc run time)
 export const createTaskSchema = z.object({
@@ -15,7 +15,7 @@ export const createTaskSchema = z.object({
         status: statusEnum.optional(),
         position: z.number().optional(),
         dueDate: z.string().datetime("Hạn hoàn thành phải đúng định dạng ISO").optional().nullable(),
-        assigneeId: z.string().uuid().optional(),
+        assigneeId: z.string().uuid().optional().nullable(),
     })
     
 });

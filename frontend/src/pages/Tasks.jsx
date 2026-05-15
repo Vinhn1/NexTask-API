@@ -27,31 +27,54 @@ export default function Tasks() {
   useEffect(() => {
     if (!socket) return;
 
-    // Lắng nghe sự kiện cập nhật task từ server
-    socket.on("task:updated", (data) => {
-      // lấy dữ liệu task 
-      const taskFormSocket = data.updatedTask;
-
-      // Kiểm tra xem task bị thay đổi có thuộc project hiện tại không
-      if (data.updatedTask.projectId === currentProject?.id) {
+    // Dùng named function để socket.off() xóa đúng listener, tránh duplicate
+    const onTaskCreated = (data) => {
+      const newTask = data.task;
+      if (newTask.projectId === currentProject?.id) {
         setTasks(prevTask => {
-          // Cập nhật lại task trong ds
-          const newTask = prevTask.map(t => t.id === taskFormSocket.id ? taskFormSocket : t);
-
-          // sort để vị trí kéo thả hiển thị đúng
-          return newTask.sort((a, b) => a.position - b.position);
-        })
+          const isExisted = prevTask.find(p => p.id === newTask.id);
+          if (isExisted) return prevTask;
+          return [...prevTask, newTask].sort((a, b) => a.position - b.position);
+        });
       }
-    });
+    };
 
+    const onTaskUpdated = (data) => {
+      const taskFromSocket = data.updatedTask;
+      if (taskFromSocket.projectId === currentProject?.id) {
+        setTasks(prevTask => {
+          const updated = prevTask.map(t => t.id === taskFromSocket.id ? taskFromSocket : t);
+          return updated.sort((a, b) => a.position - b.position);
+        });
+
+        // Cập nhật selectedTask nếu đang mở đúng task đó
+        setSelectedTask(prev => prev?.id === taskFromSocket.id ? taskFromSocket : prev);
+      }
+    };
+
+    const onTaskDeleted = (data) => {
+      const deletedTaskId = data.taskId;
+      setTasks(prevTask => prevTask.filter(t => t.id !== deletedTaskId));
+    };
+
+    socket.on("task:created", onTaskCreated);
+    socket.on("task:updated", onTaskUpdated);
+    socket.on("task:deleted", onTaskDeleted);
+
+    // Cleanup: truyền đúng function reference để xóa đúng listener
     return () => {
-      socket.off("task:updated");
+      socket.off("task:created", onTaskCreated);
+      socket.off("task:updated", onTaskUpdated);
+      socket.off("task:deleted", onTaskDeleted);
     };
 
   }, [socket, currentProject]);
 
 
-  
+
+
+
+
   const fetchTasks = async () => {
     if (!currentProject) return;
     setLoading(true);
@@ -100,7 +123,7 @@ export default function Tasks() {
 
   const handleTaskCreated = (newTask) => {
     if (currentProject && newTask.projectId === currentProject.id) {
-      setTasks(prev => [newTask, ...prev]);
+      //    setTasks(prev => [newTask, ...prev]);
     }
   };
 
@@ -113,6 +136,22 @@ export default function Tasks() {
     // Cập nhật lại danh sách projects và currentProject với data mới nhất (có members mới)
     setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
     setCurrentProject(updatedProject);
+  };
+
+
+  const handleTaskDeleted = (taskId) => {
+    // 1. Cập nhật danh sách task hiện tại (đuổi task bị xóa ra khỏi mảng)
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+
+    // 2. Đóng sidebar vì task đó không còn tồn tại nữa
+    setSelectedTask(null);
+  };
+
+  const handleTaskUpdate = (updatedTask) => {
+    // Cập nhật trong mảng tasks
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    // Cập nhật selectedTask đang hiển thị
+    setSelectedTask(updatedTask);
   };
 
 
@@ -161,7 +200,7 @@ export default function Tasks() {
     } catch (error) {
       console.error("Lỗi cập nhật kéo thả:", error);
       // Nếu lỗi, có thể load lại data để đảm bảo tính nhất quán
-      fetchTasks(); 
+      fetchTasks();
     }
   };
 
@@ -336,6 +375,8 @@ export default function Tasks() {
               task={selectedTask}
               project={currentProject}
               onClose={() => setSelectedTask(null)}
+              onTaskDelete={handleTaskDeleted}
+              onTaskUpdate={handleTaskUpdate}
             />
           )}
 
@@ -344,7 +385,7 @@ export default function Tasks() {
             onClose={() => setIsTaskFormOpen(false)}
             projectId={currentProject?.id}
             onTaskCreated={handleTaskCreated}
-            projectMembers={currentProject ? [currentProject.owner, ...(currentProject.members || [])] : []}
+            projectMembers={currentProject ? [currentProject.owner, ...(currentProject.members || [])].filter(m => m != null) : []}
           />
 
           <ProjectForm

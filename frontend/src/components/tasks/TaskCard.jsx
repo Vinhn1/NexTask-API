@@ -64,11 +64,14 @@ export default function TaskCard({ task, index, onClick, isSelected }) {
             <div className="flex items-center justify-between mt-auto pt-2">
               <div className="flex -space-x-2">
                 {task.assignee ? (
-                  <div className="w-7 h-7 rounded-full bg-[#c0c1ff] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#07006c] shadow-sm">
-                    {task.assignee.charAt(0).toUpperCase()}
+                  <div 
+                    title={task.assignee.fullname || task.assignee.name}
+                    className="w-7 h-7 rounded-full bg-[#c0c1ff] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#07006c] shadow-sm"
+                  >
+                    {(task.assignee.fullname || task.assignee.name || 'U').charAt(0).toUpperCase()}
                   </div>
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-500 shadow-sm">
+                  <div title="Chưa phân công" className="w-7 h-7 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-gray-500 shadow-sm">
                     ?
                   </div>
                 )}

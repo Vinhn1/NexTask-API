@@ -58,7 +58,7 @@ export class TaskService {
                         id: projectId
                     }
                 },
-                ...(assigneeId && {assignee: {connect: {id: assigneeId}}}),
+                ...(assigneeId && assigneeId.trim() !== "" ? { assignee: { connect: { id: assigneeId } } } : {}),
                 position: newPosition
             }
         });
@@ -192,7 +192,21 @@ export class TaskService {
                 ...updateData,
                 ...(updateDueDate !== undefined && { dueDate: updateDueDate ? new Date(updateDueDate) : null }),
                 ...(updateProjectId && { project: { connect: { id: updateProjectId } } }),
-                ...(updateAssigneeId && { assignee: { connect: { id: updateAssigneeId } } }),
+                ...(updateAssigneeId !== undefined && { 
+                    assignee: updateAssigneeId 
+                        ? { connect: { id: updateAssigneeId } } 
+                        : { disconnect: true } 
+                }),
+            },
+            include: {
+                assignee: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                        email: true,
+                        avatar: true
+                    }
+                }
             }
         });
 
