@@ -8,7 +8,7 @@ export class TaskService {
     async createTask(userId: string, data: CreateTaskDto) {
 
         const {projectId, dueDate, assigneeId, ...taskData } = data;
-
+       
 
         //  Kiểm tra Project và Quyền hạn cùng lúc 
         const project = await prisma.project.findFirst({
@@ -29,6 +29,25 @@ export class TaskService {
             throw new AppError("Project không tồn tại hoặc bạn không có quyền truy cập", 404);
         }
 
+         // Tìm Task cuối bảng
+        const lastTask = await prisma.task.findFirst({
+            where: {
+                projectId,
+                status: data.status || "TODO",
+                deletedAt: null
+            },
+            orderBy: {
+                position: 'desc'
+            },
+            select: {
+                position: true
+            }
+        })
+
+        // Tính toán newPosition 
+        const step = 1024; // Khoảng cách an toàn để chèn vào giữa
+        const newPosition = lastTask ? lastTask.position + step : step;
+
         // Tiến hành tạo Task
         const newTask = await prisma.task.create({
             data: {
@@ -39,7 +58,8 @@ export class TaskService {
                         id: projectId
                     }
                 },
-                ...(assigneeId && {assignee: {connect: {id: assigneeId}}})
+                ...(assigneeId && {assignee: {connect: {id: assigneeId}}}),
+                position: newPosition
             }
         });
 
@@ -108,7 +128,7 @@ export class TaskService {
                 skip: skip,
                 take: take,
                 orderBy: {
-                    createdAt: 'desc'
+                    position: 'asc'
                 }
             }),
             prisma.task.count ({
@@ -176,12 +196,27 @@ export class TaskService {
             }
         });
 
+
+
         // --- BẮT ĐẦU LOGIC REAL-TIME (SOCKET.IO) ---
         const io = getIO();
 
+        // Xác định loại hành động để frontend xử lý hiệu ứng mượt
+        let action = "task_update";
+        
+        if(data.status && data.position !== undefined){
+            // Di chuyển sang cột khác
+            action = "task_moved_alt_column";
+        }else if(data.position !== undefined){
+            // Chỉ thay đổi thứ tự trong cùng cột
+            action = "task_reordered";
+        }else if(data.status){
+            action = "status_changed";
+        }
+
         // 1. Gửi sự kiện cập nhật đến toàn bộ thành viên trong dự án
         io.to(`project:${updatedTask.projectId}`).emit("task:updated", {
-            action: data.status ? "status_changed" : "task_updated",
+            action,
             taskId: updatedTask.id,
             newStatus: updatedTask.status,
             updatedTask,

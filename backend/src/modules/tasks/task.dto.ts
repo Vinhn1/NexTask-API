@@ -13,6 +13,7 @@ export const createTaskSchema = z.object({
         projectId: z.string().uuid("ProjectId không đúng định dạng UUID"),
         priority: priorityEnum.optional(),
         status: statusEnum.optional(),
+        position: z.number().optional(),
         dueDate: z.string().datetime("Hạn hoàn thành phải đúng định dạng ISO").optional().nullable(),
         assigneeId: z.string().uuid().optional(),
     })
