@@ -86,7 +86,7 @@ export const AuthPage = () => {
                 {/* Hiển thị thông báo lỗi nếu có */}
                 {error && (
                     <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm animate-in fade-in zoom-in duration-300">
-                        <span className="material-symbols-outlined text-[20px]">error</span>
+                        <span className="material-symbols-rounded text-[20px]">error</span>
                         <p className="font-medium">{error}</p>
                     </div>
                 )}

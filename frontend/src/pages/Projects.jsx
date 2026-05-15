@@ -38,7 +38,7 @@ export default function Projects() {
           <p className="text-[#464554] font-medium">Tổ chức các nhiệm vụ theo dự án để quản lý dễ dàng hơn.</p>
         </div>
         <button className="px-5 py-2.5 bg-[#4648d4] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-100">
-          <span className="material-symbols-outlined text-[20px]">create_new_folder</span>
+          <span className="material-symbols-rounded text-[20px]">create_new_folder</span>
           Dự án mới
         </button>
       </div>
@@ -51,10 +51,10 @@ export default function Projects() {
             <div key={project.id} className="bg-white p-6 rounded-3xl border border-[#e4e1ed] hover:border-[#4648d4] hover:shadow-xl hover:shadow-indigo-50/50 transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#e1e0ff] flex items-center justify-center text-[#4648d4]">
-                  <span className="material-symbols-outlined text-[24px]">folder</span>
+                  <span className="material-symbols-rounded text-[24px]">folder</span>
                 </div>
                 <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#fcf8ff] text-[#767586]">
-                  <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                  <span className="material-symbols-rounded text-[20px]">more_vert</span>
                 </button>
               </div>
               <h3 className="text-lg font-extrabold text-[#1b1b23] group-hover:text-[#4648d4] transition-colors mb-2 line-clamp-1">
@@ -77,7 +77,7 @@ export default function Projects() {
           ))
         ) : (
           <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-[#c7c4d7]">
-            <span className="material-symbols-outlined text-[48px] text-[#c7c4d7] mb-2">folder_off</span>
+            <span className="material-symbols-rounded text-[48px] text-[#c7c4d7] mb-2">folder_off</span>
             <p className="text-[#767586] font-medium">Bạn chưa có dự án nào. Hãy tạo dự án đầu tiên!</p>
           </div>
         )}

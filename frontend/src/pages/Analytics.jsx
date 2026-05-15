@@ -54,11 +54,11 @@ export default function Analytics() {
         </div>
         <div className="flex items-center gap-3">
           <button className="px-4 py-2 bg-white border border-[#e4e1ed] rounded-xl text-sm font-bold text-[#464554] flex items-center gap-2 hover:bg-[#fcf8ff] transition-all">
-            <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+            <span className="material-symbols-rounded text-[20px]">calendar_today</span>
             7 ngày qua
           </button>
           <button className="px-4 py-2 bg-[#4648d4] text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-100">
-            <span className="material-symbols-outlined text-[20px]">download</span>
+            <span className="material-symbols-rounded text-[20px]">download</span>
             Xuất báo cáo
           </button>
         </div>

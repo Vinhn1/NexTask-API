@@ -70,7 +70,7 @@ export default function Sidebar({ projects = [], currentProject, onSelectProject
       </div>
       
       <div className="flex flex-col gap-0.5 px-3 overflow-y-auto max-h-[300px]">
-        {projects.map((project) => (
+        {Array.isArray(projects) && projects.map((project) => (
           <button
             key={project.id}
             onClick={() => onSelectProject(project)}

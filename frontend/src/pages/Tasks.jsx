@@ -69,7 +69,7 @@ export default function Tasks() {
           <p className="text-[#464554] font-medium">Quản lý và theo dõi tiến độ công việc của bạn.</p>
         </div>
         <button className="px-5 py-2.5 bg-[#4648d4] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-100">
-          <span className="material-symbols-outlined text-[20px]">add</span>
+          <span className="material-symbols-rounded text-[20px]">add</span>
           Thêm nhiệm vụ
         </button>
       </div>
@@ -138,10 +138,10 @@ export default function Tasks() {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
                           <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e4e1ed] transition-all text-[#767586] hover:text-[#4648d4]">
-                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                            <span className="material-symbols-rounded text-[18px]">edit</span>
                           </button>
                           <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e4e1ed] transition-all text-[#767586] hover:text-red-500">
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                            <span className="material-symbols-rounded text-[18px]">delete</span>
                           </button>
                         </div>
                       </td>
