@@ -8,6 +8,7 @@ import TaskDetailSidebar from "../components/tasks/TaskDetailSidebar.jsx";
 import TaskForm from "../components/tasks/TaskForm.jsx";
 import ProjectForm from "../components/projects/ProjectForm.jsx";
 import ProjectMemberForm from "../components/projects/ProjectMemberForm.jsx";
+import { useSocket } from "../contexts/SocketContext.jsx";
 
 export default function Tasks() {
   const { user } = useAuth();
@@ -15,12 +16,54 @@ export default function Tasks() {
   const [currentProject, setCurrentProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedTask, setSelectedTask] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
   const [isMemberFormOpen, setIsMemberFormOpen] = useState(false);
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Lắng nghe sự kiện cập nhật task từ server
+    socket.on("task:updated", (data) => {
+      // lấy dữ liệu task 
+      const taskFormSocket = data.updatedTask;
+
+      // Kiểm tra xem task bị thay đổi có thuộc project hiện tại không
+      if (data.updatedTask.projectId === currentProject?.id) {
+        setTasks(prevTask => {
+          // Cập nhật lại task trong ds
+          const newTask = prevTask.map(t => t.id === taskFormSocket.id ? taskFormSocket : t);
+
+          // sort để vị trí kéo thả hiển thị đúng
+          return newTask.sort((a, b) => a.position - b.position);
+        })
+      }
+    });
+
+    return () => {
+      socket.off("task:updated");
+    };
+
+  }, [socket, currentProject]);
+
+
+  
+  const fetchTasks = async () => {
+    if (!currentProject) return;
+    setLoading(true);
+    try {
+      const res = await taskService.getProjectTasks(currentProject.id);
+      setTasks(res.data || []);
+    } catch (error) {
+      console.error("Fetch tasks error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Phân biệt Owner: Nếu người dùng hiện tại là người tạo dự án
   const isOwner = currentProject && user && currentProject.ownerId === user.id;
@@ -49,19 +92,9 @@ export default function Tasks() {
     fetchProjects();
   }, []);
 
+
+
   useEffect(() => {
-    if (!currentProject) return;
-    const fetchTasks = async () => {
-      setLoading(true);
-      try {
-        const res = await taskService.getProjectTasks(currentProject.id);
-        setTasks(res.data || []);
-      } catch (error) {
-        console.error("Fetch tasks error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTasks();
   }, [currentProject]);
 
@@ -82,6 +115,56 @@ export default function Tasks() {
     setCurrentProject(updatedProject);
   };
 
+
+  const handleDragEnd = async (result) => {
+    const { destination, source, draggableId } = result;
+    // 1. Nếu người dùng thả ra ngoài vùng cho phép hoặc thả về đúng chỗ cũ
+    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+      return;
+    }
+    // 2. Tìm danh sách task của cột đích và sắp xếp chúng theo thứ tự position
+    const destColumnTasks = tasks
+      .filter(t => t.status === destination.droppableId)
+      .sort((a, b) => a.position - b.position);
+    let newPosition;
+    // 3. CHIẾN THUẬT LEXORANK: Tính toán vị trí mới
+    if (destColumnTasks.length === 0) {
+      // Cột trống trơn
+      newPosition = 1024;
+    } else if (destination.index === 0) {
+      // Thả vào vị trí đầu tiên của cột
+      newPosition = destColumnTasks[0].position / 2;
+    } else if (destination.index >= destColumnTasks.length) {
+      // Thả vào vị trí cuối cùng của cột
+      newPosition = destColumnTasks[destColumnTasks.length - 1].position + 1024;
+    } else {
+      // Thả vào giữa Task A và Task B
+      const taskAbove = destColumnTasks[destination.index - 1];
+      const taskBelow = destColumnTasks[destination.index];
+      newPosition = (taskAbove.position + taskBelow.position) / 2;
+    }
+    // 4. OPTIMISTIC UPDATE: Cập nhật UI ngay lập tức cho sướng mắt
+    const updatedTasks = tasks.map(t =>
+      t.id === draggableId
+        ? { ...t, status: destination.droppableId, position: newPosition }
+        : t
+    );
+    // Cần sort lại state để UI hiển thị đúng thứ tự mới sau khi cập nhật position
+    setTasks(updatedTasks.sort((a, b) => a.position - b.position));
+    // 5. Gửi lệnh cập nhật lên Server
+    try {
+      await taskService.updateTask(draggableId, {
+        status: destination.droppableId,
+        position: newPosition
+      });
+      // Gợi ý: Server sẽ emit socket 'task:updated' cho các user khác
+    } catch (error) {
+      console.error("Lỗi cập nhật kéo thả:", error);
+      // Nếu lỗi, có thể load lại data để đảm bảo tính nhất quán
+      fetchTasks(); 
+    }
+  };
+
   const handleCreateMockData = async () => {
     setLoading(true);
     try {
@@ -89,7 +172,7 @@ export default function Tasks() {
         title: 'Product Development Board',
         description: 'Bảng theo dõi tiến độ phát triển sản phẩm mẫu.',
       });
-      
+
       const newProject = newProjectRes.data?.project || newProjectRes.data || newProjectRes;
       const projectId = newProject.id;
 
@@ -129,9 +212,9 @@ export default function Tasks() {
   });
 
   return (
-    <DashboardLayout 
-      projects={projects} 
-      currentProject={currentProject} 
+    <DashboardLayout
+      projects={projects}
+      currentProject={currentProject}
       onSelectProject={setCurrentProject}
       onNewTaskClick={() => isOwner && setIsTaskFormOpen(true)}
       onNewProjectClick={() => setIsProjectFormOpen(true)}
@@ -153,16 +236,16 @@ export default function Tasks() {
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:flex -space-x-2">
                     {/* Chủ sở hữu luôn hiện đầu tiên */}
-                    <div 
+                    <div
                       title={`Owner: ${currentProject.owner?.fullname || 'N/A'}`}
                       className="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white flex items-center justify-center text-[10px] font-bold text-white z-30"
                     >
                       {currentProject.owner?.fullname?.charAt(0).toUpperCase() || 'O'}
                     </div>
-                    
+
                     {/* Danh sách thành viên (tối đa 3 người hiện avatar) */}
                     {currentProject.members?.slice(0, 3).map((member, idx) => (
-                      <div 
+                      <div
                         key={member.id}
                         title={member.fullname}
                         className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600 z-20"
@@ -175,7 +258,7 @@ export default function Tasks() {
                         )}
                       </div>
                     ))}
-                    
+
                     {/* Số lượng còn lại */}
                     {currentProject.members?.length > 3 && (
                       <div className="w-8 h-8 rounded-full bg-[#e1e0ff] border-2 border-white flex items-center justify-center text-[10px] font-bold text-[#4648d4] z-0">
@@ -184,7 +267,7 @@ export default function Tasks() {
                     )}
                   </div>
                   {isOwner && (
-                    <button 
+                    <button
                       onClick={() => setIsMemberFormOpen(true)}
                       className="w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-[#4648d4] hover:text-[#4648d4] transition-all group"
                     >
@@ -197,20 +280,20 @@ export default function Tasks() {
             </div>
             <p className="text-[#464554] font-medium text-lg">Quản lý và theo dõi tiến độ công việc dự án.</p>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="relative">
               <span className="material-symbols-rounded absolute left-3.5 top-1/2 -translate-y-1/2 text-[#767586] text-[20px]">search</span>
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm nhiệm vụ..." 
+              <input
+                type="text"
+                placeholder="Tìm kiếm nhiệm vụ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-11 pr-4 py-3 bg-white border border-[#e4e1ed] rounded-xl text-sm font-medium w-full md:w-64 focus:outline-none focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff] transition-all shadow-sm placeholder:text-[#767586]"
               />
             </div>
             {isOwner && (
-              <button 
+              <button
                 onClick={() => setIsTaskFormOpen(true)}
                 className="px-5 py-3 bg-[#4648d4] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-200 flex-shrink-0"
               >
@@ -224,39 +307,40 @@ export default function Tasks() {
         {/* Board Area */}
         <div className="flex-1 overflow-hidden flex relative -mx-2 px-2 pb-2">
           <div className="flex-1 overflow-x-auto h-full custom-scrollbar pr-4">
-             {loading ? (
-                <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
-                  <span className="material-symbols-rounded animate-spin text-[32px] text-[#4648d4]">refresh</span>
-                  Đang tải dữ liệu bảng...
-                </div>
-             ) : projects.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
-                  <span className="material-symbols-rounded text-[64px] text-[#e4e1ed]">dashboard_customize</span>
-                  <p>Bạn chưa có dự án nào để bắt đầu công việc.</p>
-                  <button onClick={() => setIsProjectFormOpen(true)} className="px-6 py-3 bg-[#4648d4] text-white rounded-xl font-bold hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-200 mt-2 flex items-center gap-2">
-                    <span className="material-symbols-rounded text-[20px]">add</span>
-                    Tạo dự án mới ngay
-                  </button>
-                </div>
-             ) : (
-                <TaskBoard 
-                  tasks={filteredTasks} 
-                  onTaskClick={setSelectedTask} 
-                  selectedTaskId={selectedTask?.id} 
-                />
-             )}
+            {loading ? (
+              <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
+                <span className="material-symbols-rounded animate-spin text-[32px] text-[#4648d4]">refresh</span>
+                Đang tải dữ liệu bảng...
+              </div>
+            ) : projects.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
+                <span className="material-symbols-rounded text-[64px] text-[#e4e1ed]">dashboard_customize</span>
+                <p>Bạn chưa có dự án nào để bắt đầu công việc.</p>
+                <button onClick={() => setIsProjectFormOpen(true)} className="px-6 py-3 bg-[#4648d4] text-white rounded-xl font-bold hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-200 mt-2 flex items-center gap-2">
+                  <span className="material-symbols-rounded text-[20px]">add</span>
+                  Tạo dự án mới ngay
+                </button>
+              </div>
+            ) : (
+              <TaskBoard
+                tasks={filteredTasks}
+                onTaskClick={setSelectedTask}
+                selectedTaskId={selectedTask?.id}
+                onDragEnd={handleDragEnd}
+              />
+            )}
           </div>
-          
+
           {selectedTask && (
-            <TaskDetailSidebar 
-              task={selectedTask} 
-              project={currentProject} 
-              onClose={() => setSelectedTask(null)} 
+            <TaskDetailSidebar
+              task={selectedTask}
+              project={currentProject}
+              onClose={() => setSelectedTask(null)}
             />
           )}
 
-          <TaskForm 
-            isOpen={isTaskFormOpen} 
+          <TaskForm
+            isOpen={isTaskFormOpen}
             onClose={() => setIsTaskFormOpen(false)}
             projectId={currentProject?.id}
             onTaskCreated={handleTaskCreated}

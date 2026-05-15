@@ -23,7 +23,7 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
     params: z.object({
-        id: z.string().uuid('ID công việc không hợp lệ'),
+        taskId: z.string().uuid('ID công việc không hợp lệ'),
     }),
     body: createTaskSchema.shape.body.partial(),
 })
