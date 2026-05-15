@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ProjectController } from './project.controller';
 import { protect } from '../../middlewares/authMiddleware';
 import { validate } from '../../middlewares/validate';
-import { createProjectSchema, updateProjectSchema } from './project.dto';
+import { createProjectSchema, updateProjectSchema, addMemberSchema } from './project.dto';
 
 const router = Router();
 const projectController = new ProjectController();
@@ -21,4 +21,9 @@ router.patch('/:id', protect, validate(updateProjectSchema) ,projectController.u
 // DELETE 
 router.delete('/:id', protect, projectController.delete);
 
+// MEMBERS
+router.get('/:projectId/members', protect, projectController.getMembers);
+router.post('/:projectId/members', protect, validate(addMemberSchema), projectController.addMember);
+
 export default router;
+

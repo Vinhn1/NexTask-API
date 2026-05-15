@@ -23,7 +23,20 @@ const projectService = {
   deleteProject: async (projectId) => {
     const response = await api.delete(`/projects/${projectId}`);
     return response.data;
+  },
+
+  // Thêm thành viên vào dự án
+  addMember: async (projectId, email) => {
+    const response = await api.post(`/projects/${projectId}/members`, { email });
+    return response.data;
+  },
+
+  // Lấy danh sách thành viên
+  getMembers: async (projectId) => {
+    const response = await api.get(`/projects/${projectId}/members`);
+    return response.data;
   }
 };
+
 
 export default projectService;

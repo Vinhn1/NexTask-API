@@ -1,7 +1,7 @@
 import Sidebar from "./Sidebar.jsx";
 import TopBar from "./TopBar.jsx";
 
-export default function DashboardLayout({ children, projects, currentProject, onSelectProject, taskCount = 0 }) {
+export default function DashboardLayout({ children, projects, currentProject, onSelectProject, onNewTaskClick, onNewProjectClick, isOwner, taskCount = 0 }) {
   return (
     <div className="flex min-h-screen bg-[#fcf8ff]" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Sidebar */}
@@ -9,6 +9,9 @@ export default function DashboardLayout({ children, projects, currentProject, on
         projects={projects} 
         currentProject={currentProject} 
         onSelectProject={onSelectProject} 
+        onNewTaskClick={onNewTaskClick}
+        onNewProjectClick={onNewProjectClick}
+        isOwner={isOwner}
       />
 
       {/* Main Content */}

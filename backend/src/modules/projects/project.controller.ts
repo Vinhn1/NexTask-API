@@ -92,4 +92,37 @@ export class ProjectController {
             next(error);
         }
     }
+
+    async addMember(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { projectId } = req.params;
+            const { email } = req.body;
+            const ownerId = req.user!.id;
+
+            const project = await projectService.addMember(projectId, ownerId, email);
+
+            res.status(200).json({
+                status: 'success',
+                data: { project }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getMembers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { projectId } = req.params;
+            const userId = req.user!.id;
+
+            const members = await projectService.getProjectMembers(projectId, userId);
+
+            res.status(200).json({
+                status: 'success',
+                data: { ...members }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

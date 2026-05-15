@@ -9,10 +9,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css'
 import { ResetPassword } from './pages/ResetPassword';
 import HomePage from './pages/home/HomePage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter>
         <Routes>
           <Route path='/auth' element={<AuthPage />} />

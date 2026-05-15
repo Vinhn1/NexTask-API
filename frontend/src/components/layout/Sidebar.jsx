@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-export default function Sidebar({ projects = [], currentProject, onSelectProject }) {
+export default function Sidebar({ projects = [], currentProject, onSelectProject, onNewTaskClick, onNewProjectClick, isOwner }) {
   const location = useLocation();
 
   const navItems = [
@@ -64,9 +64,15 @@ export default function Sidebar({ projects = [], currentProject, onSelectProject
       </nav>
 
       {/* Projects Section */}
-      <div className="px-5 pb-1.5 text-[11px] font-semibold text-[#767586] uppercase tracking-widest flex justify-between items-center">
+      <div className="px-5 pb-1.5 text-[11px] font-semibold text-[#767586] uppercase tracking-widest flex justify-between items-center group">
         Dự án tham gia
-        <span className="material-symbols-rounded text-sm cursor-pointer hover:text-[#4648d4]">add</span>
+        <button 
+          onClick={onNewProjectClick}
+          className="w-5 h-5 flex items-center justify-center rounded-md bg-[#e9e6f3] text-[#4648d4] hover:bg-[#4648d4] hover:text-white transition-all shadow-sm"
+          title="Tạo dự án mới"
+        >
+          <span className="material-symbols-rounded text-[16px]">add</span>
+        </button>
       </div>
       
       <div className="flex flex-col gap-0.5 px-3 overflow-y-auto max-h-[300px]">
@@ -87,12 +93,17 @@ export default function Sidebar({ projects = [], currentProject, onSelectProject
       </div>
 
       {/* Footer: New Task Button */}
-      <div className="mt-auto px-3 pb-5 pt-4 border-t border-[#c7c4d7]">
-        <button className="w-full py-2.5 bg-[#4648d4] hover:bg-[#3537c0] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm shadow-[#4648d4]/30">
-          <span className="material-symbols-rounded text-lg leading-none">add</span>
-          Nhiệm vụ mới
-        </button>
-      </div>
+      {isOwner && (
+        <div className="mt-auto px-3 pb-5 pt-4 border-t border-[#c7c4d7]">
+          <button 
+            onClick={onNewTaskClick}
+            className="w-full py-2.5 bg-[#4648d4] hover:bg-[#3537c0] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-sm shadow-[#4648d4]/30"
+          >
+            <span className="material-symbols-rounded text-lg leading-none">add</span>
+            Nhiệm vụ mới
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

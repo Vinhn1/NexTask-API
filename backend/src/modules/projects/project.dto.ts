@@ -18,6 +18,16 @@ export const updateProjectSchema = z.object({
     }),
 });
 
+export const addMemberSchema = z.object({
+    params: z.object({
+        projectId: z.string().uuid('ID dự án không hợp lệ'),
+    }),
+    body: z.object({
+        email: z.string().email('Email không hợp lệ'),
+    }),
+});
+
+
 export interface CreateProjectDTO {
     title: string;
     description?: string;

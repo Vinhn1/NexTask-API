@@ -70,6 +70,25 @@ export default {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif']
+      },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'fade-in-right': {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'scale-x': {
+          '0%': { transform: 'scaleX(0)' },
+          '100%': { transform: 'scaleX(1)' },
+        }
+      },
+      animation: {
+        'fade-in': 'fade-in 0.3s ease-out',
+        'fade-in-right': 'fade-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        'scale-x': 'scale-x 0.3s ease-out forwards',
       }
     },
   },

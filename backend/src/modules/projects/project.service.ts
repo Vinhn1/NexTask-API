@@ -39,20 +39,41 @@ export class ProjectService {
 
     }  
 
-    // Lấy danh sách project (User chỉ xem được project của chính họ)
+    // Lấy danh sách project (User xem được project họ tạo HOẶC họ là thành viên)
     async getUserProjects(userId: string) {
-        // Lấy toàn bộ list project của user đã đăng nhập 
         try{
-            // findMany -> Lấy nhiều record 
             return await prisma.project.findMany({
-                // CHỈ lấy project thuộc về user hiện tại
-                where:  { ownerId: userId }
+                where: {
+                    OR: [
+                        { ownerId: userId },
+                        { members: { some: { id: userId } } }
+                    ]
+                },
+                include: {
+                    owner: {
+                        select: {
+                            id: true,
+                            fullname: true,
+                            avatar: true
+                        }
+                    },
+                    members: {
+                        select: {
+                            id: true,
+                            fullname: true,
+                            avatar: true
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             })
         }catch(error){  
             throw error;
         }
-
     }
+
 
     // Update
     async updateProject(projectId: string, userId: string, data: Partial<CreateProjectDTO>) {
@@ -149,6 +170,113 @@ export class ProjectService {
             throw error;
         }
        
+    }
+
+    // Add Member
+    async addMember(projectId: string, ownerId: string, memberEmail: string) {
+        try {
+            // 1. Kiểm tra project tồn tại và check quyền owner
+            const project = await prisma.project.findUnique({
+                where: { id: projectId },
+                include: { members: true }
+            });
+
+            if (!project) {
+                throw new AppError("Dự án không tồn tại", 404);
+            }
+
+            if (project.ownerId !== ownerId) {
+                throw new AppError("Chỉ chủ sở hữu mới có quyền thêm thành viên", 403);
+            }
+
+            // 2. Tìm user theo email
+            const userToAdd = await prisma.user.findUnique({
+                where: { email: memberEmail }
+            });
+
+            if (!userToAdd) {
+                throw new AppError("Không tìm thấy người dùng với email này", 404);
+            }
+
+            // 3. Không cho phép thêm chính mình
+            if (userToAdd.id === ownerId) {
+                throw new AppError("Bạn đã là chủ sở hữu dự án này", 400);
+            }
+
+            // 4. Kiểm tra user đã là thành viên chưa
+            const isAlreadyMember = project.members.some(member => member.id === userToAdd.id);
+            if (isAlreadyMember) {
+                throw new AppError("Người dùng này đã là thành viên của dự án", 400);
+            }
+
+            // 5. Thêm thành viên
+            return await prisma.project.update({
+                where: { id: projectId },
+                data: {
+                    members: {
+                        connect: { id: userToAdd.id }
+                    }
+                },
+                include: {
+                    members: {
+                        select: {
+                            id: true,
+                            fullname: true,
+                            email: true,
+                            avatar: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Lấy danh sách thành viên của project
+    async getProjectMembers(projectId: string, userId: string) {
+        try {
+            const project = await prisma.project.findUnique({
+                where: { id: projectId },
+                include: {
+                    members: {
+                        select: {
+                            id: true,
+                            fullname: true,
+                            email: true,
+                            avatar: true
+                        }
+                    },
+                    owner: {
+                        select: {
+                            id: true,
+                            fullname: true,
+                            email: true,
+                            avatar: true
+                        }
+                    }
+                }
+            });
+
+            if (!project) {
+                throw new AppError("Không tìm thấy dự án", 404);
+            }
+
+            // Kiểm tra user có thuộc project này không (là owner hoặc member)
+            const isMember = project.members.some(m => m.id === userId);
+            const isOwner = project.ownerId === userId;
+
+            if (!isMember && !isOwner) {
+                throw new AppError("Bạn không có quyền xem thông tin này", 403);
+            }
+
+            return {
+                owner: project.owner,
+                members: project.members
+            };
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

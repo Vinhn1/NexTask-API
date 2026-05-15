@@ -87,6 +87,7 @@ model Project{
 model Task{
   id  String @id @default(uuid())
   title String 
+  description String?
   status  TaskStatus @default(TODO)
   priority  TaskPriority  @default(MEDIUM)
   dueDate DateTime? @map("due_date")
