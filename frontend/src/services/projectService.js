@@ -1,0 +1,29 @@
+import api from './api';
+
+const projectService = {
+  // Lấy danh sách dự án của user
+  getUserProjects: async () => {
+    const response = await api.get('/projects');
+    return response.data;
+  },
+
+  // Tạo dự án mới
+  createProject: async (projectData) => {
+    const response = await api.post('/projects', projectData);
+    return response.data;
+  },
+
+  // Cập nhật dự án
+  updateProject: async (projectId, updateData) => {
+    const response = await api.patch(`/projects/${projectId}`, updateData);
+    return response.data;
+  },
+
+  // Xóa dự án
+  deleteProject: async (projectId) => {
+    const response = await api.delete(`/projects/${projectId}`);
+    return response.data;
+  }
+};
+
+export default projectService;

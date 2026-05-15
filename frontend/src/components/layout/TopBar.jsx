@@ -1,9 +1,20 @@
-export default function TopBar({ name = "Alex", taskCount = 4 }) {
+import { useAuth } from "../../contexts/AuthContext";
+
+export default function TopBar({ taskCount = 0 }) {
+  const { user } = useAuth();
+
+  // Lấy chữ cái đầu của tên
+  const initials = user?.fullname
+    ? user.fullname.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase()
+    : "NT";
+
+  const firstName = user?.fullname?.split(" ")[0] || "Bạn";
+
   return (
     <header className="flex items-center justify-between px-8 py-4 border-b border-[#c7c4d7] bg-[#fcf8ff]">
       {/* Left: Greeting */}
       <div>
-        <h1 className="text-xl font-bold text-[#1b1b23]">Chào buổi sáng, {name}! 👋</h1>
+        <h1 className="text-xl font-bold text-[#1b1b23]">Chào buổi sáng, {firstName}! 👋</h1>
         <p className="text-sm text-[#767586] mt-0.5">
           Bạn có <span className="font-semibold text-[#4648d4]">{taskCount} nhiệm vụ</span> cần hoàn thành hôm nay
         </p>
@@ -33,8 +44,11 @@ export default function TopBar({ name = "Alex", taskCount = 4 }) {
         ))}
 
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4648d4] to-[#57dffe] flex items-center justify-center text-white text-sm font-bold flex-shrink-0 cursor-pointer">
-          AL
+        <div
+          title={user?.fullname || "Người dùng"}
+          className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4648d4] to-[#57dffe] flex items-center justify-center text-white text-sm font-bold flex-shrink-0 cursor-pointer"
+        >
+          {initials}
         </div>
       </div>
     </header>

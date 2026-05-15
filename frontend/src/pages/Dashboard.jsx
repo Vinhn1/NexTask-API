@@ -1,50 +1,135 @@
-import Sidebar from "../components/layout/Sidebar.jsx";
-import TopBar from "../components/layout/TopBar.jsx";
+import { useState, useEffect } from "react";
+import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsGrid from "../components/dashboard/StatsGrid.jsx";
 import TaskList from "../components/dashboard/TaskList.jsx";
 import WeeklyOutput from "../components/dashboard/WeeklyOutput.jsx";
 import ActivityFeed from "../components/dashboard/ActivityFeed.jsx";
 import DeadlinesCalendar from "../components/dashboard/DeadlinesCalendar.jsx";
 import ProjectProgressCard from "../components/dashboard/ProjectProgressCard.jsx";
+import { useAuth } from "../contexts/AuthContext";
+import projectService from "../services/projectService";
+import taskService from "../services/taskService";
 
 export default function Dashboard() {
-  return (
-    <div className="flex min-h-screen bg-[#fcf8ff]" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Fixed Sidebar — w-60 = 240px */}
-      <Sidebar />
+  const { user } = useAuth();
+  const [projects, setProjects] = useState([]);
+  const [currentProject, setCurrentProject] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-      {/* Main area offset by sidebar width */}
-      <div className="flex flex-col flex-1 min-w-0 ml-60">
-        {/* Sticky Top Bar */}
-        <TopBar name="Alex" taskCount={4} />
+  // 1. Lấy danh sách dự án khi load trang
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await projectService.getUserProjects();
+        // Backend trả về: { status, result, data: { projects: [...] } }
+        const projectList = res.data?.projects || [];
+        setProjects(projectList);
+        
+        // Nếu có dự án, chọn dự án đầu tiên làm mặc định
+        if (projectList.length > 0) {
+          setCurrentProject(projectList[0]);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Fetch projects error:", error);
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
 
-        {/* Scrollable Main Content */}
-        <main className="flex-1 p-6 xl:p-8 bg-[#fcf8ff] overflow-auto">
-          <div className="max-w-screen-2xl mx-auto flex flex-col gap-6">
+  // 2. Lấy task và stats khi currentProject thay đổi
+  useEffect(() => {
+    if (!currentProject) return;
 
-            {/* Stats Row — 4 equal columns */}
-            <StatsGrid />
+    const fetchProjectData = async () => {
+      setLoading(true);
+      try {
+        const [taskRes, statsRes] = await Promise.all([
+          taskService.getProjectTasks(currentProject.id),
+          taskService.getTaskStats(currentProject.id)
+        ]);
+        
+        // Backend trả về: { status, data: [...tasks], pagination }
+        setTasks(taskRes.data || []);
+        setStats(statsRes);
+      } catch (error) {
+        console.error("Fetch project data error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-            {/* Content Grid: left wide | right 320px panel */}
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
+    fetchProjectData();
+  }, [currentProject]);
 
-              {/* Left Column */}
-              <div className="flex flex-col gap-6 min-w-0">
-                <TaskList />
-                <WeeklyOutput />
-                <ActivityFeed />
-              </div>
+  const handleToggleTask = async (taskId, done) => {
+    try {
+      const newStatus = done ? 'DONE' : 'IN_PROGRESS';
+      await taskService.updateTask(taskId, { status: newStatus });
+      // Re-fetch hoặc update local state
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+    } catch (error) {
+      console.error("Toggle task error:", error);
+    }
+  };
 
-              {/* Right Panel */}
-              <div className="flex flex-col gap-6">
-                <DeadlinesCalendar />
-                <ProjectProgressCard projectName="Mobile App v2.0" progress={68} />
-              </div>
-
-            </div>
-          </div>
-        </main>
+  if (loading && projects.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#fcf8ff]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#4648d4] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-[#4648d4] font-semibold">Đang tải dữ liệu...</p>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <DashboardLayout 
+      projects={projects} 
+      currentProject={currentProject} 
+      onSelectProject={setCurrentProject}
+      taskCount={tasks.filter(t => t.status !== 'DONE').length}
+    >
+      <div className="mb-10">
+        <h2 className="text-[32px] font-extrabold text-[#1b1b23] tracking-tight mb-2">
+          Chào buổi sáng, {user?.fullname?.split(' ')[0] || "Bạn"} 👋
+        </h2>
+        <p className="text-[#464554] text-lg font-medium">
+          Bạn có <span className="text-[#4648d4] font-bold">{tasks.filter(t => t.status !== 'DONE').length} nhiệm vụ</span> cần hoàn thành trong hôm nay.
+        </p>
+      </div>
+
+      {/* Stats Row */}
+      <StatsGrid statsData={stats} />
+
+      {/* Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 mt-10">
+        {/* Left Column */}
+        <div className="flex flex-col gap-8 min-w-0">
+          <TaskList 
+            tasks={tasks.slice(0, 5)} 
+            onToggle={handleToggleTask} 
+            projectName={currentProject?.title}
+            progress={stats ? Math.round((stats.done / stats.total) * 100) : 0}
+          />
+          <WeeklyOutput />
+          <ActivityFeed />
+        </div>
+
+        {/* Right Panel */}
+        <div className="flex flex-col gap-8">
+          <DeadlinesCalendar tasks={tasks} />
+          <ProjectProgressCard 
+            projectName={currentProject?.title || "Dự án"} 
+            progress={stats ? Math.round((stats.done / stats.total) * 100) : 0} 
+          />
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

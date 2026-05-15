@@ -5,7 +5,7 @@ import { FeatureCard } from "@/components/landing/LandingParts";
 
 export default function Features() {
   return (
-    <section className="py-[72px] px-8">
+    <section className="py-24 px-8">
       <div className="text-center mb-12">
         <SectionLabel>Tính năng cốt lõi</SectionLabel>
         <h2 className="text-[42px] font-black tracking-tighter text-dark leading-tight">

@@ -1,12 +1,16 @@
-const navItems = [
-  { icon: "dashboard", label: "Tổng quan", active: true },
-  { icon: "task_alt", label: "Nhiệm vụ" },
-  { icon: "folder", label: "Dự án" },
-  { icon: "bar_chart", label: "Phân tích" },
-  { icon: "group", label: "Đội nhóm" },
-];
+import { Link, useLocation } from "react-router-dom";
 
-export default function Sidebar() {
+export default function Sidebar({ projects = [], currentProject, onSelectProject }) {
+  const location = useLocation();
+
+  const navItems = [
+    { icon: "dashboard", label: "Tổng quan", path: "/dashboard" },
+    { icon: "task_alt", label: "Nhiệm vụ", path: "/tasks" },
+    { icon: "folder", label: "Dự án", path: "/projects" },
+    { icon: "bar_chart", label: "Phân tích", path: "/analytics" },
+    { icon: "group", label: "Đội nhóm", path: "/team" },
+  ];
+
   return (
     <aside className="fixed left-0 top-0 h-full w-60 flex flex-col bg-[#f5f2fe] border-r border-[#c7c4d7] z-50">
       {/* Logo */}
@@ -21,11 +25,13 @@ export default function Sidebar() {
       <div className="mx-3 mb-4">
         <div className="flex items-center gap-2.5 px-3 py-2 bg-[#e9e6f3] rounded-xl cursor-pointer hover:bg-[#e1e0ff] transition-colors">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4648d4] to-[#57dffe] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
-            ET
+            {currentProject?.title?.substring(0, 2).toUpperCase() || "NT"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[#1b1b23] truncate">Engineering Team</p>
-            <span className="text-[11px] text-[#767586] uppercase tracking-wide">Workspace</span>
+            <p className="text-sm font-semibold text-[#1b1b23] truncate">
+              {currentProject?.title || "NexTask"}
+            </p>
+            <span className="text-[11px] text-[#767586] uppercase tracking-wide">Dự án hiện tại</span>
           </div>
           <span className="material-symbols-rounded text-[18px] text-[#767586]">expand_more</span>
         </div>
@@ -33,26 +39,52 @@ export default function Sidebar() {
 
       {/* Nav Section Label */}
       <div className="px-5 pb-1.5 text-[11px] font-semibold text-[#767586] uppercase tracking-widest">
-        Menu
+        Menu chính
       </div>
 
       {/* Nav Items */}
-      <nav className="flex flex-col gap-0.5 px-3">
-        {navItems.map(({ icon, label, active }) => (
-          <a
-            key={label}
-            href="#"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              active
-                ? "bg-[#e1e0ff] text-[#4648d4]"
-                : "text-[#464554] hover:bg-[#e9e6f3]"
+      <nav className="flex flex-col gap-0.5 px-3 mb-6">
+        {navItems.map(({ icon, label, path }) => {
+          const active = location.pathname === path;
+          return (
+            <Link
+              key={label}
+              to={path}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                active
+                  ? "bg-[#e1e0ff] text-[#4648d4]"
+                  : "text-[#464554] hover:bg-[#e9e6f3]"
+              }`}
+            >
+              <span className="material-symbols-rounded text-xl leading-none">{icon}</span>
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Projects Section */}
+      <div className="px-5 pb-1.5 text-[11px] font-semibold text-[#767586] uppercase tracking-widest flex justify-between items-center">
+        Dự án tham gia
+        <span className="material-symbols-rounded text-sm cursor-pointer hover:text-[#4648d4]">add</span>
+      </div>
+      
+      <div className="flex flex-col gap-0.5 px-3 overflow-y-auto max-h-[300px]">
+        {projects.map((project) => (
+          <button
+            key={project.id}
+            onClick={() => onSelectProject(project)}
+            className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors text-left ${
+              currentProject?.id === project.id
+                ? "bg-[#efecf8] text-[#4648d4] font-bold"
+                : "text-[#767586] hover:bg-[#e9e6f3]"
             }`}
           >
-            <span className="material-symbols-rounded text-xl leading-none">{icon}</span>
-            {label}
-          </a>
+            <span className="w-2 h-2 rounded-full bg-[#57dffe]"></span>
+            <span className="truncate">{project.title}</span>
+          </button>
         ))}
-      </nav>
+      </div>
 
       {/* Footer: New Task Button */}
       <div className="mt-auto px-3 pb-5 pt-4 border-t border-[#c7c4d7]">

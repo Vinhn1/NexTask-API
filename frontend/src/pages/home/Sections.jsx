@@ -14,7 +14,7 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="py-18 px-8 bg-white mx-8 rounded-[24px] border border-border">
+    <section className="py-24 px-8 bg-white mx-8 my-12 rounded-[24px] border border-border">
       <div className="text-center mb-12">
         <SectionLabel>Từ người dùng</SectionLabel>
         <h2 className="text-4xl font-black tracking-tight">Được yêu thích bởi các team</h2>
@@ -48,7 +48,7 @@ export function Testimonials() {
 // ── CTABanner ──────────────────────────────────────────────────
 export function CTABanner() {
   return (
-    <section className="py-18 px-8">
+    <section className="py-24 px-8">
       <div className="bg-gradient-to-br from-indigo via-indigoDark to-cyan rounded-[28px] px-12 py-16 text-center relative overflow-hidden">
         <div className="absolute -top-15 -right-15 w-[200px] h-[200px] bg-white/5 rounded-full" />
         <div className="absolute -bottom-20 -left-10 w-[240px] h-[240px] bg-white/5 rounded-full" />
@@ -61,7 +61,7 @@ export function CTABanner() {
             Tham gia 50,000+ người dùng và bắt đầu quản lý công việc chuyên nghiệp hơn.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <Link to="/auth" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
+            <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
               <Rocket size={18} /> Đăng ký miễn phí
             </Link>
             <a href="#" className="inline-flex items-center gap-2 px-6 py-4 bg-white/10 text-white font-semibold text-base rounded-[14px] no-underline border border-white/20 hover:bg-white/20 transition-all">

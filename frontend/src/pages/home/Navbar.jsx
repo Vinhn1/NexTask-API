@@ -30,14 +30,12 @@ export default function Navbar() {
 
       {/* Auth */}
       <div className="flex items-center gap-3">
-        <Link to="/auth" className="text-[14px] font-semibold text-muted no-underline hover:text-primary transition-colors">
+        <Link to="/auth?mode=login" className="text-[14px] font-semibold text-muted no-underline hover:text-primary transition-colors">
           Đăng nhập
         </Link>
-        <Link to="/auth">
-          <BtnPrimary className="px-5 py-2.5 text-[14px] rounded-xl">
-            Bắt đầu miễn phí
-          </BtnPrimary>
-        </Link>
+        <BtnPrimary href="/auth?mode=signup" className="px-5 py-2.5 text-[14px] rounded-xl">
+          Bắt đầu miễn phí
+        </BtnPrimary>
       </div>
     </nav>
   );

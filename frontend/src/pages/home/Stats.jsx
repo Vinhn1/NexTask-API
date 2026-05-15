@@ -10,7 +10,7 @@ export function Stats() {
     { val: "35%",   label: "Time Saved",        color: C.cyan },
   ];
   return (
-    <section className="mt-16 mx-8">
+    <section className="mt-20 mb-4 mx-8">
       <Card className="px-12 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 text-center">
           {stats.map((s, i) => (

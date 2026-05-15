@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Rocket, Play, Bell, Check } from "lucide-react";
 import { C } from "@/constants/brand";
 import Pill from "@/components/ui/Pill";
@@ -28,11 +27,9 @@ export default function Hero() {
       </p>
 
       <div className="flex justify-center items-center gap-3 mb-4 flex-wrap">
-        <Link to="/auth">
-          <BtnPrimary className="text-base px-8 py-4">
-            <Rocket size={18} /> Dùng thử miễn phí
-          </BtnPrimary>
-        </Link>
+        <BtnPrimary href="/auth?mode=signup" className="text-base px-8 py-4">
+          <Rocket size={18} /> Dùng thử miễn phí
+        </BtnPrimary>
         <BtnGhost className="text-base px-6 py-4">
           <Play size={18} className="text-primary" /> Xem demo
         </BtnGhost>

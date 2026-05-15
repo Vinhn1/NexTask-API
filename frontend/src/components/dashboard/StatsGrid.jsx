@@ -1,57 +1,57 @@
-const stats = [
-  {
-    icon: "checklist",
-    iconBg: "#e1e0ff",
-    iconColor: "#4648d4",
-    badge: "+12%",
-    badgeBg: "#e1e0ff",
-    badgeColor: "#3537c0",
-    label: "Tổng nhiệm vụ",
-    value: "24",
-    sub: "Sprint này",
-    subColor: "#767586",
-  },
-  {
-    icon: "check_circle",
-    iconBg: "#acedff",
-    iconColor: "#00687a",
-    badge: "18 xong",
-    badgeBg: "#acedff",
-    badgeColor: "#004e5c",
-    label: "Đã hoàn thành",
-    value: "75%",
-    sub: "Đúng tiến độ",
-    subColor: "#00687a",
-  },
-  {
-    icon: "autorenew",
-    iconBg: "#ffdcc5",
-    iconColor: "#904900",
-    badge: "Còn 6",
-    badgeBg: "#ffdcc5",
-    badgeColor: "#703700",
-    label: "Đang thực hiện",
-    value: "06",
-    sub: "3 dự án",
-    subColor: "#904900",
-  },
-  {
-    icon: "warning",
-    iconBg: "#ffdad6",
-    iconColor: "#93000a",
-    badge: "Khẩn",
-    badgeBg: "#ffdad6",
-    badgeColor: "#93000a",
-    label: "Quá hạn",
-    value: "02",
-    sub: "Cần xử lý",
-    subColor: "#ba1a1a",
-  },
-];
+export default function StatsGrid({ statsData }) {
+  const stats = [
+    {
+      icon: "checklist",
+      iconBg: "#e1e0ff",
+      iconColor: "#4648d4",
+      badge: "+12%",
+      badgeBg: "#e1e0ff",
+      badgeColor: "#3537c0",
+      label: "Tổng nhiệm vụ",
+      value: statsData?.total || 0,
+      sub: "Sprint này",
+      subColor: "#767586",
+    },
+    {
+      icon: "check_circle",
+      iconBg: "#acedff",
+      iconColor: "#00687a",
+      badge: `${statsData?.done || 0} xong`,
+      badgeBg: "#acedff",
+      badgeColor: "#004e5c",
+      label: "Đã hoàn thành",
+      value: statsData ? `${Math.round((statsData.done / statsData.total) * 100) || 0}%` : "0%",
+      sub: "Đúng tiến độ",
+      subColor: "#00687a",
+    },
+    {
+      icon: "autorenew",
+      iconBg: "#ffdcc5",
+      iconColor: "#904900",
+      badge: `Còn ${statsData?.todo + statsData?.inProgress || 0}`,
+      badgeBg: "#ffdcc5",
+      badgeColor: "#703700",
+      label: "Đang thực hiện",
+      value: statsData?.inProgress || 0,
+      sub: "Đang xử lý",
+      subColor: "#904900",
+    },
+    {
+      icon: "warning",
+      iconBg: "#ffdad6",
+      iconColor: "#93000a",
+      badge: "Khẩn",
+      badgeBg: "#ffdad6",
+      badgeColor: "#93000a",
+      label: "Quá hạn",
+      value: statsData?.overdue || 0,
+      sub: "Cần xử lý",
+      subColor: "#ba1a1a",
+    },
+  ];
 
-export default function StatsGrid() {
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map(({ icon, iconBg, iconColor, badge, badgeBg, badgeColor, label, value, sub, subColor }) => (
         <div
           key={label}

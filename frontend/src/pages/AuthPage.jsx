@@ -76,10 +76,10 @@ export const AuthPage = () => {
                         </svg>
                     </Link>
                     <h1 className="text-3xl font-extrabold text-[#1b1b23] tracking-tight mb-2">
-                        {isLogin ? 'Welcome Back' : 'Create Account'}
+                        {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản mới'}
                     </h1>
                     <p className="text-[#464554] text-sm">
-                        {isLogin ? 'Enter your credentials to access NexTask' : 'Join NexTask and start managing your tasks like a pro'}
+                        {isLogin ? 'Nhập thông tin để truy cập vào NexTask' : 'Tham gia NexTask và bắt đầu quản lý công việc hiệu quả'}
                     </p>
                 </div>
 
@@ -95,36 +95,36 @@ export const AuthPage = () => {
                     {/*  Chỉ hiện field Name nếu KHÔNG PHẢI là login */}
                     {!isLogin && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                            <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Full Name</label>
+                            <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Họ và tên</label>
                             <input 
                                 type="text" 
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="John Doe"
-                                className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/10 outline-none transition-all placeholder:text-slate-400"
+                                placeholder="Nguyễn Văn A"
+                                className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#4648d4] focus:ring-4 focus:ring-[#4648d4]/10 outline-none transition-all placeholder:text-slate-400"
                                 required
                             />
                         </div>
                     )}
 
                     <div>
-                        <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Email Address</label>
+                        <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Địa chỉ Email</label>
                         <input 
                             type="email" 
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="name@company.com"
-                            className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/10 outline-none transition-all placeholder:text-slate-400"
+                            className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#4648d4] focus:ring-4 focus:ring-[#4648d4]/10 outline-none transition-all placeholder:text-slate-400"
                             required
                         />
                     </div>
 
                     <div>
                         <div className="flex items-center justify-between mb-1.5 ml-1">
-                            <label className="block text-sm font-semibold text-[#1b1b23]">Password</label>
+                            <label className="block text-sm font-semibold text-[#1b1b23]">Mật khẩu</label>
                             {isLogin && (
                                 <Link to="/resetpass" className="text-xs font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-colors uppercase tracking-wider no-underline">
-                                    Forgot?
+                                    Quên?
                                 </Link>
                             )}
                         </div>
@@ -133,7 +133,7 @@ export const AuthPage = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/10 outline-none transition-all placeholder:text-slate-400"
+                            className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#4648d4] focus:ring-4 focus:ring-[#4648d4]/10 outline-none transition-all placeholder:text-slate-400"
                             required
                         />
                     </div>
@@ -146,10 +146,10 @@ export const AuthPage = () => {
                         {isSubmitting ? (
                             <>
                                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Processing...
+                                Đang xử lý...
                             </>
                         ) : (
-                            isLogin ? 'Sign In' : 'Create Account'
+                            isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'
                         )}
                     </button>
                 </form>
@@ -159,7 +159,7 @@ export const AuthPage = () => {
                         <span className="w-full border-t border-slate-100"></span>
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-slate-400 font-medium tracking-widest">Or continue with</span>
+                        <span className="bg-white px-4 text-slate-400 font-medium tracking-widest">Hoặc tiếp tục với</span>
                     </div>
                 </div>
 
@@ -183,16 +183,17 @@ export const AuthPage = () => {
 
                 <div className="mt-10 text-center">
                     <p className="text-sm text-[#464554] font-medium">
-                        {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
+                        {isLogin ? "Chưa có tài khoản?" : "Đã có tài khoản?"}{' '}
                         <button 
                             onClick={() => setIsLogin(!isLogin)}
                             className="font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-all underline-offset-4 hover:underline"
                         >
-                            {isLogin ? 'Create an account' : 'Sign in to NexTask'}
+                            {isLogin ? 'Tạo tài khoản mới' : 'Đăng nhập vào NexTask'}
                         </button>
                     </p>
                 </div>
             </div>
         </div>
+
     );
 };

@@ -9,7 +9,7 @@ export function HowItWorks() {
     { n: 3, bg: "#10b981",  title: "Theo dõi & hoàn thành", desc: "Dashboard realtime, báo cáo tự động và ăn mừng thành quả." },
   ];
   return (
-    <section className="py-18 px-8 bg-white mx-8 rounded-[24px] border border-border">
+    <section className="py-24 px-8 bg-white mx-8 my-12 rounded-[24px] border border-border">
       <div className="text-center mb-12">
         <SectionLabel>Cách hoạt động</SectionLabel>
         <h2 className="text-4xl font-black tracking-tight">3 bước để bắt đầu</h2>

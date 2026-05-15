@@ -6,7 +6,7 @@ import { PricingTier } from "@/components/landing/LandingParts";
 
 export default function Pricing() {
   return (
-    <section className="py-18 px-8">
+    <section className="py-24 px-8">
       <div className="text-center mb-12">
         <SectionLabel>Bảng giá</SectionLabel>
         <h2 className="text-4xl font-black tracking-tight">Minh bạch, không bất ngờ</h2>
@@ -44,14 +44,14 @@ export default function Pricing() {
         </div>
 
         {/* Enterprise */}
-        <Card className="p-8 bg-[#0f172a] border-none">
+        <Card className="p-8">
           <PricingTier
-            plan="Enterprise" planColor="#64748b" price="Custom" priceSub="liên hệ báo giá"
-            priceColor="#f1f5f9" subColor="#64748b"
+            plan="Enterprise" planColor="#1b1b23" price="Custom" priceSub="liên hệ báo giá"
+            priceColor="#1b1b23" subColor="#64748b"
             features={["Tất cả tính năng Pro","SSO & SAML","SLA & support riêng","Audit logs & compliance"]}
-            featureColor="#cbd5e1"
-            btnLabel="Liên hệ Sales" btnStyle="dark"
-            dividerColor="#1e293b"
+            featureColor="#1b1b23"
+            btnLabel="Liên hệ Sales" btnStyle="dark-outline"
+            dividerColor="#f0edf8"
           />
         </Card>
       </div>

@@ -61,10 +61,10 @@ export function PricingTier({
       {btnStyle === "ghost" && (
         <BtnGhost className="w-full justify-center py-3.5">{btnLabel}</BtnGhost>
       )}
-      {btnStyle === "dark" && (
+      {btnStyle === "dark-outline" && (
         <a 
           href="#" 
-          className="block py-3.5 bg-transparent text-slate-400 font-bold text-[15px] rounded-xl text-center no-underline border border-slate-700 hover:bg-slate-800 transition-colors"
+          className="block py-3.5 bg-transparent text-dark font-bold text-[15px] rounded-xl text-center no-underline border border-dark hover:bg-dark hover:text-white transition-all"
         >
           {btnLabel}
         </a>
