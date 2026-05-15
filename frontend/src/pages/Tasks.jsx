@@ -3,6 +3,8 @@ import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import taskService from "../services/taskService";
 import projectService from "../services/projectService";
 import { useAuth } from "../contexts/AuthContext";
+import TaskBoard from "../components/tasks/TaskBoard.jsx";
+import TaskDetailSidebar from "../components/tasks/TaskDetailSidebar.jsx";
 
 export default function Tasks() {
   const { user } = useAuth();
@@ -10,21 +12,27 @@ export default function Tasks() {
   const [currentProject, setCurrentProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL'); // ALL, TODO, IN_PROGRESS, DONE
+  
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchProjects = async () => {
+    try {
+      const res = await projectService.getUserProjects();
+      const projectList = res.data || [];
+      setProjects(projectList);
+      if (projectList.length > 0) {
+        setCurrentProject(projectList[0]);
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Fetch projects error:", error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await projectService.getUserProjects();
-        const projectList = res.data || [];
-        setProjects(projectList);
-        if (projectList.length > 0) {
-          setCurrentProject(projectList[0]);
-        }
-      } catch (error) {
-        console.error("Fetch projects error:", error);
-      }
-    };
     fetchProjects();
   }, []);
 
@@ -34,7 +42,7 @@ export default function Tasks() {
       setLoading(true);
       try {
         const res = await taskService.getProjectTasks(currentProject.id);
-        setTasks(res.data.tasks || []);
+        setTasks(res.data || []);
       } catch (error) {
         console.error("Fetch tasks error:", error);
       } finally {
@@ -44,18 +52,70 @@ export default function Tasks() {
     fetchTasks();
   }, [currentProject]);
 
-  const filteredTasks = tasks.filter(t => {
-    if (filter === 'ALL') return true;
-    return t.status === filter;
-  });
+  const handleCreateMockData = async () => {
+    setLoading(true);
+    try {
+      // 1. Tạo dự án mẫu
+      const newProjectRes = await projectService.createProject({
+        title: 'Product Development Board',
+        description: 'Bảng theo dõi tiến độ phát triển sản phẩm mẫu.',
+      });
+      
+      const newProject = newProjectRes.data || newProjectRes;
+      const projectId = newProject.id || newProject._id;
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'HIGH': return { bg: '#ffdad6', text: '#93000a', label: 'Cao' };
-      case 'MEDIUM': return { bg: '#e1e0ff', text: '#3537c0', label: 'Trung bình' };
-      default: return { bg: '#e2e2e6', text: '#464554', label: 'Thấp' };
+      // 2. Tạo các nhiệm vụ mẫu cho dự án
+      const tasksToCreate = [
+        {
+          title: 'API Infrastructure Migration to GraphQL',
+          status: 'TODO',
+          priority: 'HIGH',
+          dueDate: new Date(Date.now() + 86400000 * 5).toISOString(),
+          description: 'Cần chuyển đổi toàn bộ REST API sang GraphQL.\n\nMục tiêu:\n- Đánh giá các endpoint hiện tại\n- Xây dựng schema\n- Viết resolver',
+          projectId: projectId
+        },
+        {
+          title: 'Design System Token Audit & Sync',
+          status: 'IN_PROGRESS',
+          priority: 'MEDIUM',
+          dueDate: new Date(Date.now() + 86400000 * 2).toISOString(),
+          description: 'Đồng bộ hóa Design System với Tailwind CSS.\n\nMục tiêu:\n- Cập nhật colors\n- Tối ưu typography\n- Test component library',
+          projectId: projectId
+        },
+        {
+          title: 'Dark Mode Theme Refinement',
+          status: 'TODO',
+          priority: 'LOW',
+          description: 'Sửa lỗi màu sắc không tương phản khi bật Dark Mode.',
+          projectId: projectId
+        },
+        {
+          title: 'Mobile Responsive Dashboards',
+          status: 'DONE',
+          priority: 'HIGH',
+          dueDate: new Date(Date.now() - 86400000 * 1).toISOString(),
+          description: 'Tối ưu UI cho mobile.\n\nĐã hoàn thành:\n- Sidebar collapse\n- Stack card layout',
+          projectId: projectId
+        }
+      ];
+
+      for (const task of tasksToCreate) {
+        await taskService.createTask(task);
+      }
+
+      // Tải lại dữ liệu sau khi tạo
+      await fetchProjects();
+    } catch (error) {
+      console.error("Lỗi khi tạo dữ liệu mẫu:", error);
+      alert("Có lỗi xảy ra khi tạo dữ liệu mẫu. Vui lòng thử lại.");
+      setLoading(false);
     }
   };
+
+  const filteredTasks = tasks.filter(t => {
+    if (!searchQuery) return true;
+    return t.title.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <DashboardLayout 
@@ -63,98 +123,77 @@ export default function Tasks() {
       currentProject={currentProject} 
       onSelectProject={setCurrentProject}
     >
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-[28px] font-extrabold text-[#1b1b23] tracking-tight">Danh sách nhiệm vụ</h2>
-          <p className="text-[#464554] font-medium">Quản lý và theo dõi tiến độ công việc của bạn.</p>
-        </div>
-        <button className="px-5 py-2.5 bg-[#4648d4] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-100">
-          <span className="material-symbols-rounded text-[20px]">add</span>
-          Thêm nhiệm vụ
-        </button>
-      </div>
-
-      <div className="bg-white rounded-3xl border border-[#e4e1ed] overflow-hidden shadow-sm">
-        {/* Filters */}
-        <div className="flex items-center gap-6 px-6 py-4 border-b border-[#e4e1ed] bg-[#fcf8ff]/50">
-          {['ALL', 'TODO', 'IN_PROGRESS', 'DONE'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`text-sm font-bold transition-all pb-1 border-b-2 ${
-                filter === f ? "text-[#4648d4] border-[#4648d4]" : "text-[#767586] border-transparent hover:text-[#464554]"
-              }`}
-            >
-              {f === 'ALL' ? 'Tất cả' : f === 'TODO' ? 'Cần làm' : f === 'IN_PROGRESS' ? 'Đang làm' : 'Hoàn thành'}
-            </button>
-          ))}
-        </div>
-
-        {/* Task Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-[#fcf8ff]/30 text-[#767586] text-[13px] font-bold uppercase tracking-wider">
-                <th className="px-6 py-4">Nhiệm vụ</th>
-                <th className="px-6 py-4">Trạng thái</th>
-                <th className="px-6 py-4">Ưu tiên</th>
-                <th className="px-6 py-4">Hạn chót</th>
-                <th className="px-6 py-4">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e4e1ed]">
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-[#767586]">Đang tải dữ liệu...</td>
-                </tr>
-              ) : filteredTasks.length > 0 ? (
-                filteredTasks.map((task) => {
-                  const prio = getPriorityColor(task.priority);
-                  return (
-                    <tr key={task.id} className="hover:bg-[#fcf8ff] transition-colors group">
-                      <td className="px-6 py-5">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-[#1b1b23] group-hover:text-[#4648d4] transition-colors">{task.title}</span>
-                          <span className="text-xs text-[#767586] mt-0.5">{currentProject?.title}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${
-                          task.status === 'DONE' ? 'bg-green-100 text-green-700' : 
-                          task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' : 
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {task.status === 'DONE' ? 'Hoàn thành' : task.status === 'IN_PROGRESS' ? 'Đang làm' : 'Cần làm'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span className="px-3 py-1 rounded-full text-[11px] font-bold" style={{ backgroundColor: prio.bg, color: prio.text }}>
-                          {prio.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-sm text-[#464554] font-medium">
-                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : '---'}
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-2">
-                          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e4e1ed] transition-all text-[#767586] hover:text-[#4648d4]">
-                            <span className="material-symbols-rounded text-[18px]">edit</span>
-                          </button>
-                          <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-[#e4e1ed] transition-all text-[#767586] hover:text-red-500">
-                            <span className="material-symbols-rounded text-[18px]">delete</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-[#767586]">Không tìm thấy nhiệm vụ nào.</td>
-                </tr>
+      <div className="flex flex-col h-[calc(100vh-64px)]">
+        {/* Header section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4 flex-shrink-0">
+          <div>
+            <div className="flex items-center gap-4 mb-2">
+              <h2 className="text-[32px] font-extrabold text-[#1b1b23] tracking-tight">
+                {currentProject ? currentProject.title : 'Bảng nhiệm vụ'}
+              </h2>
+              {/* Avatar stack mockup */}
+              {currentProject && (
+                <div className="hidden sm:flex -space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-xs font-bold text-blue-700">A</div>
+                  <div className="w-8 h-8 rounded-full bg-pink-100 border-2 border-white flex items-center justify-center text-xs font-bold text-pink-700">B</div>
+                  <div className="w-8 h-8 rounded-full bg-[#6063ee] border-2 border-white flex items-center justify-center text-[10px] font-bold text-white">+12</div>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+            <p className="text-[#464554] font-medium text-lg">Quản lý và theo dõi tiến độ công việc dự án.</p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <span className="material-symbols-rounded absolute left-3.5 top-1/2 -translate-y-1/2 text-[#767586] text-[20px]">search</span>
+              <input 
+                type="text" 
+                placeholder="Tìm kiếm nhiệm vụ..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-11 pr-4 py-3 bg-white border border-[#e4e1ed] rounded-xl text-sm font-medium w-full md:w-64 focus:outline-none focus:border-[#4648d4] focus:ring-4 focus:ring-[#e1e0ff] transition-all shadow-sm placeholder:text-[#767586]"
+              />
+            </div>
+            <button className="px-5 py-3 bg-[#4648d4] text-white rounded-xl font-bold flex items-center gap-2 hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-200 flex-shrink-0">
+              <span className="material-symbols-rounded text-[20px]">add</span>
+              Thêm nhiệm vụ
+            </button>
+          </div>
+        </div>
+
+        {/* Board Area */}
+        <div className="flex-1 overflow-hidden flex relative -mx-2 px-2 pb-2">
+          <div className="flex-1 overflow-x-auto h-full custom-scrollbar pr-4">
+             {loading ? (
+                <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
+                  <span className="material-symbols-rounded animate-spin text-[32px] text-[#4648d4]">refresh</span>
+                  Đang tải dữ liệu bảng...
+                </div>
+             ) : projects.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-[#767586] font-medium text-lg flex-col gap-4">
+                  <span className="material-symbols-rounded text-[64px] text-[#e4e1ed]">dashboard_customize</span>
+                  <p>Bạn chưa có dự án nào để bắt đầu công việc.</p>
+                  <button onClick={handleCreateMockData} className="px-6 py-3 bg-[#4648d4] text-white rounded-xl font-bold hover:bg-[#3537c0] transition-all shadow-lg shadow-indigo-200 mt-2 flex items-center gap-2">
+                    <span className="material-symbols-rounded text-[20px]">magic_button</span>
+                    Tạo dự án mẫu tự động
+                  </button>
+                </div>
+             ) : (
+                <TaskBoard 
+                  tasks={filteredTasks} 
+                  onTaskClick={setSelectedTask} 
+                  selectedTaskId={selectedTask?.id} 
+                />
+             )}
+          </div>
+          
+          {selectedTask && (
+            <TaskDetailSidebar 
+              task={selectedTask} 
+              project={currentProject} 
+              onClose={() => setSelectedTask(null)} 
+            />
+          )}
         </div>
       </div>
     </DashboardLayout>

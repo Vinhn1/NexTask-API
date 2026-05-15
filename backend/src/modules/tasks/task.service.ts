@@ -1,6 +1,7 @@
 import prisma from "../../lib/prisma";
 import AppError from "../../utils/appError";
 import { CreateTaskDto, UpdateTaskDto } from "./task.dto";
+import { getIO } from "../../lib/io";
 
 export class TaskService {
     // Tạo mới Task 
@@ -29,7 +30,7 @@ export class TaskService {
         }
 
         // Tiến hành tạo Task
-        return await prisma.task.create({
+        const newTask = await prisma.task.create({
             data: {
                 ...taskData,
                 dueDate: dueDate ? new Date(dueDate) : null,
@@ -40,7 +41,29 @@ export class TaskService {
                 },
                 ...(assigneeId && {assignee: {connect: {id: assigneeId}}})
             }
-        })
+        });
+
+        // --- REAL-TIME (SOCKET.IO) ---
+        const io = getIO();
+        
+        // 1. Thông báo cho cả dự án có Task mới
+        io.to(`project:${newTask.projectId}`).emit("task:created", {
+            action: "task_created",
+            taskId: newTask.id,
+            task: newTask
+        });
+
+        // 2. Nếu có gán người thực hiện, gửi thông báo riêng cho họ
+        if (newTask.assigneeId) {
+            io.to(`user:${newTask.assigneeId}`).emit("notification", {
+                type: "TASK_ASSIGNED",
+                message: `Bạn đã được gán một công việc mới: "${newTask.title}"`,
+                taskId: newTask.id,
+                task: newTask
+            });
+        }
+
+        return newTask;
     }
 
     // GetALL Task 
@@ -106,8 +129,9 @@ export class TaskService {
 
     }
 
-    // Update
+    // Update Task
     async updateTask(taskId: string, userId: string, data: UpdateTaskDto) {
+        
         // Tìm task kèm theo thông tin Project của nó 
         const task = await prisma.task.findFirst({
             where: {
@@ -120,7 +144,6 @@ export class TaskService {
                     include: {
                         members: {
                             where: {
-                                // Chỉ lấy thành viên nếu Id khớp với user đang đăng nhập 
                                 id: userId
                             }
                         }
@@ -135,26 +158,47 @@ export class TaskService {
         
         // Check quyền: User có thuộc Project của Task này không?
         const isOwner = task.project.ownerId === userId;
-        // Kiểm tra trong mảng members
         const isMember = task.project.members.length > 0;
 
         if(!isOwner && !isMember)
-            throw new AppError("Bạn không có quyền", 403) ;
+            throw new AppError("Bạn không có quyền chỉnh sửa Task này", 403) ;
 
-        // Tiến hành update - trích xuất dueDate và projectId trước để tránh xung đột Prisma XOR type
+        // Tiến hành update
         const { dueDate: updateDueDate, projectId: updateProjectId, assigneeId: updateAssigneeId, ...updateData } = data;
-        return await prisma.task.update({
+        
+        const updatedTask = await prisma.task.update({
             where: { id: taskId},
             data: {
                 ...updateData,
-                // Riêng dueDate cần xử lý đặc biệt để Prisma hiểu kiểu Date
                 ...(updateDueDate !== undefined && { dueDate: updateDueDate ? new Date(updateDueDate) : null }),
-                // Nếu có cập nhật project thì dùng connect
                 ...(updateProjectId && { project: { connect: { id: updateProjectId } } }),
-                // Nếu có cập nhật assignee thì dùng connect
                 ...(updateAssigneeId && { assignee: { connect: { id: updateAssigneeId } } }),
             }
         });
+
+        // --- BẮT ĐẦU LOGIC REAL-TIME (SOCKET.IO) ---
+        const io = getIO();
+
+        // 1. Gửi sự kiện cập nhật đến toàn bộ thành viên trong dự án
+        io.to(`project:${updatedTask.projectId}`).emit("task:updated", {
+            action: data.status ? "status_changed" : "task_updated",
+            taskId: updatedTask.id,
+            newStatus: updatedTask.status,
+            updatedTask,
+        });
+
+        // 2. Gửi thông báo riêng cho người được gán (Assignee) nếu có thay đổi người gán
+        if (updateAssigneeId && updatedTask.assigneeId) {
+            io.to(`user:${updatedTask.assigneeId}`).emit("notification", {
+                type: "TASK_ASSIGNED",
+                message: `Bạn đã được gán công việc: "${updatedTask.title}"`,
+                taskId: updatedTask.id,
+                updatedTask
+            });
+        }
+        // --- KẾT THÚC LOGIC REAL-TIME ---
+
+        return updatedTask;
     }
 
     // Delete
@@ -192,11 +236,21 @@ export class TaskService {
         if(!isOwner && !isMember)
             throw new AppError("Bạn không có quyền", 403) ;
 
-        return await prisma.task.update({
+        const deletedTask = await prisma.task.update({
             where: { id: taskId },
             data: {
                 deletedAt: new Date()
             }
-        })
+        });
+
+        // --- REAL-TIME (SOCKET.IO) ---
+        const io = getIO();
+        // Thông báo cho cả dự án rằng Task đã bị xóa
+        io.to(`project:${deletedTask.projectId}`).emit("task:deleted", {
+            action: "task_deleted",
+            taskId: deletedTask.id
+        });
+
+        return deletedTask;
     }
 }

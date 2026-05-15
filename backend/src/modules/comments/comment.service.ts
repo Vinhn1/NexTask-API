@@ -1,20 +1,25 @@
 import AppError from "../../utils/appError";
 import { CreateCommentDto } from "./comment.dto";
 import prisma from "../../lib/prisma";
+import { getIO } from "../../lib/io";
 
 export class CommentService {
     // Tạo comment mới
     async createComment(userId: string, data: CreateCommentDto) {
-        // Kiểm tra Task có tồn tại không
+        // Kiểm tra Task có tồn tại không và lấy projectId
         const existingTask = await prisma.task.findUnique({
             where: {
                 id: data.taskId
+            },
+            select: {
+                id: true,
+                projectId: true
             }
         });
 
         // Nếu không tồn tại -> báo lỗi
         if(!existingTask){
-            throw new AppError('Task not found', 404);
+            throw new AppError('Không tìm thấy công việc để bình luận', 404);
         }
 
         // Tạo comment mới
@@ -23,7 +28,25 @@ export class CommentService {
                 content: data.content,
                 taskId: data.taskId,
                 userId: userId
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                        avatar: true
+                    }
+                }
             }
+        });
+
+        // --- REAL-TIME (SOCKET.IO) ---
+        const io = getIO();
+        // Gửi thông báo đến toàn bộ project room
+        io.to(`project:${existingTask.projectId}`).emit("comment:new", {
+            action: "comment_added",
+            taskId: existingTask.id,
+            comment: comment
         });
 
         return comment;
