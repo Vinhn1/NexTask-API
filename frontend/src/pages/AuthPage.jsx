@@ -1,13 +1,22 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSearchParams, Link } from 'react-router-dom';
 
 export const AuthPage = () => {
+    const [searchParams] = useSearchParams();
+    const mode = searchParams.get('mode');
+
     // 🧠 MENTOR TASK: Tại sao anh lại dùng useState ở đây thay vì tạo 2 page riêng biệt?
     // Đánh đổi giữa việc dùng chung 1 page (Ternary Operator) và tách 2 page là gì?
-    const [isLogin, setIsLogin] = useState(true);
+    const [isLogin, setIsLogin] = useState(mode !== 'signup');
     
+    // Đồng bộ state khi URL thay đổi
+    useEffect(() => {
+        setIsLogin(mode !== 'signup');
+    }, [mode]);
+
     // Các state để quản lý form
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -41,11 +50,11 @@ export const AuthPage = () => {
 
             <div className="w-full max-w-md bg-white rounded-[16px] shadow-[0_20px_50px_-12px_rgba(99,102,241,0.1)] p-8 border border-slate-100 backdrop-blur-sm">
                 <div className="text-center mb-10">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4648d4] to-[#06b6d4] text-white mb-6 shadow-xl shadow-indigo-100">
+                    <Link to="/" className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4648d4] to-[#06b6d4] text-white mb-6 shadow-xl shadow-indigo-100">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                         </svg>
-                    </div>
+                    </Link>
                     <h1 className="text-3xl font-extrabold text-[#1b1b23] tracking-tight mb-2">
                         {isLogin ? 'Welcome Back' : 'Create Account'}
                     </h1>
@@ -86,7 +95,9 @@ export const AuthPage = () => {
                         <div className="flex items-center justify-between mb-1.5 ml-1">
                             <label className="block text-sm font-semibold text-[#1b1b23]">Password</label>
                             {isLogin && (
-                                <a href="#" className="text-xs font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-colors uppercase tracking-wider">Forgot?</a>
+                                <Link to="/resetpass" className="text-xs font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-colors uppercase tracking-wider no-underline">
+                                    Forgot?
+                                </Link>
                             )}
                         </div>
                         <input 

@@ -8,20 +8,21 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
         // Lấy token từ headers Authorization
         const authHeader = req.headers.authorization;
 
+        // Đảm bảo authHeader là string (tránh trường hợp mảng)
+        const headerStr = Array.isArray(authHeader) ? authHeader[0] : authHeader;
         let token;
 
-        if(authHeader && authHeader.startsWith('Bearer')){
-            // Dùng hàm split(' ') để tách chuỗi token sau chữ 'Bearer'
-            token = authHeader.split(' ')[1];
+        if(headerStr && (headerStr.startsWith('Bearer') || headerStr.startsWith('bearer'))){
+            // Dùng split để tách chuỗi token sau chữ 'Bearer' hoặc 'bearer'
+            token = headerStr.split(' ')[1];
         }
 
         // Kiểm tra nếu không có token 
         if(!token){
-            return next(new AppError('Bạn chưa đăng nhập! Vuiv lòng đăng nhập để tiếp tục.', 401));
+            return next(new AppError('Bạn chưa đăng nhập! Vui lòng đăng nhập để tiếp tục.', 401));
         }
 
         // Xác thực token (sử dụng jwt.verify)
-        // Payload trả về sẽ chứa thông tin userId mà đã ký lúc login 
         const decoded = jwt.verify(token, process.env.JWT_ACCESS_TOKEN as string) as any;
 
         const currentUser = await prisma.user.findUnique({

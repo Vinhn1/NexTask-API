@@ -1,9 +1,11 @@
 import { Star, Rocket, MessageCircle, Code, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import { C } from "@/constants/brand";
 import { Card, SectionLabel } from "@/components/ui/Card";
 import Pill from "@/components/ui/Pill";
 
 // ── Testimonials ───────────────────────────────────────────────
+// ... existing TESTIMONIALS ...
 const TESTIMONIALS = [
   { quote: "NexTask thay đổi hoàn toàn cách team chúng tôi làm việc. Tiết kiệm hơn 10 giờ mỗi tuần cho việc điều phối dự án.", name: "Alex Chen",  role: "CTO @ TechFlow",              initials: "AC", bg: "#eef0fd", color: C.indigo   },
   { quote: "Giao diện đẹp, trực quan và nhanh. Đây là công cụ quản lý task tốt nhất tôi từng dùng cho team startup.",           name: "Sarah Ren",  role: "Product Lead @ Vercel",       initials: "SR", bg: "#e0f2fe", color: "#0284c7" },
@@ -59,9 +61,9 @@ export function CTABanner() {
             Tham gia 50,000+ người dùng và bắt đầu quản lý công việc chuyên nghiệp hơn.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <a href="#" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
+            <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
               <Rocket size={18} /> Đăng ký miễn phí
-            </a>
+            </Link>
             <a href="#" className="inline-flex items-center gap-2 px-6 py-4 bg-white/10 text-white font-semibold text-base rounded-[14px] no-underline border border-white/20 hover:bg-white/20 transition-all">
               Nói chuyện với Sales
             </a>
@@ -72,6 +74,7 @@ export function CTABanner() {
     </section>
   );
 }
+
 
 // ── Footer ─────────────────────────────────────────────────────
 const FOOTER_COLS = [
