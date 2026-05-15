@@ -1,74 +1,78 @@
-const days = ["M", "T", "W", "T", "F", "S", "S"];
+// Calendar data for October 2024
+const calDays = ["T2","T3","T4","T5","T6","T7","CN"];
 
-const calendarCells = [
-  { label: "26", faded: true }, { label: "27", faded: true }, { label: "28", faded: true },
-  { label: "29", faded: true }, { label: "30", faded: true },
-  { label: "1" }, { label: "2" },
-  { label: "3", bold: true }, { label: "4", bold: true },
-  { label: "5", active: true },
-  { label: "6", bold: true }, { label: "7", bold: true },
-  { label: "8" }, { label: "9" },
-  { label: "10", error: true },
+// Cells: null = prev month faded, number = date, special flags
+const calCells = [
+  { n: 26, prev: true }, { n: 27, prev: true }, { n: 28, prev: true },
+  { n: 29, prev: true }, { n: 30, prev: true },
+  { n: 1 }, { n: 2 },
+  { n: 3 }, { n: 4 }, { n: 5, today: true },
+  { n: 6 }, { n: 7 }, { n: 8 }, { n: 9 },
+  { n: 10, event: true },
+  { n: 11 }, { n: 12 }, { n: 13 }, { n: 14, project: true },
 ];
 
 const deadlines = [
-  { title: "Final QA Report", date: "Due Oct 10", borderColor: "border-error" },
-  { title: "Client Presentation", date: "Due Oct 14", borderColor: "border-primary" },
+  { color: "#ba1a1a", title: "Báo cáo QA cuối kỳ", due: "Hạn 10 Th10" },
+  { color: "#4648d4", title: "Thuyết trình khách hàng", due: "Hạn 14 Th10" },
 ];
 
 export default function DeadlinesCalendar() {
   return (
-    <div
-      className="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/5"
-      style={{ boxShadow: "0 10px 15px -3px rgba(99,102,241,0.08), 0 4px 6px -4px rgba(99,102,241,0.08)" }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-on-surface">Deadlines</h3>
-        <span className="text-xs text-on-surface-variant">October 2024</span>
+    <div className="bg-white rounded-2xl border border-[#e4e1ed] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#e4e1ed]">
+        <span className="text-base font-bold text-[#1b1b23]">Hạn chót</span>
+        <span className="text-xs text-[#767586] font-medium">Tháng 10, 2024</span>
       </div>
 
-      {/* Day headers */}
-      <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold mb-1">
-        {days.map((d, i) => (
-          <span key={i} className="text-on-surface-variant">{d}</span>
-        ))}
+      {/* Calendar Grid */}
+      <div className="px-4 py-3">
+        {/* Day headers */}
+        <div className="grid grid-cols-7 text-center mb-1">
+          {calDays.map((d) => (
+            <span key={d} className="text-[11px] font-semibold text-[#767586] py-1">{d}</span>
+          ))}
+        </div>
+
+        {/* Date cells */}
+        <div className="grid grid-cols-7 gap-0.5">
+          {calCells.map((cell, i) => {
+            if (cell.prev) return (
+              <div key={i} className="text-[12px] text-[#c7c4d7] py-1.5 text-center rounded-lg">{cell.n}</div>
+            );
+            if (cell.today) return (
+              <div key={i} className="text-[12px] bg-[#4648d4] text-white font-semibold py-1.5 text-center rounded-lg cursor-pointer">{cell.n}</div>
+            );
+            if (cell.event) return (
+              <div key={i} className="relative text-[12px] text-[#ba1a1a] font-semibold py-1.5 text-center rounded-lg cursor-pointer hover:bg-[#ffdad6]/30">
+                {cell.n}
+                <span className="absolute bottom-[3px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#ba1a1a]" />
+              </div>
+            );
+            if (cell.project) return (
+              <div key={i} className="text-[12px] text-[#4648d4] font-semibold py-1.5 text-center rounded-lg cursor-pointer hover:bg-[#e1e0ff]/50">{cell.n}</div>
+            );
+            return (
+              <div key={i} className="text-[12px] text-[#464554] py-1.5 text-center rounded-lg cursor-pointer hover:bg-[#e9e6f3]">{cell.n}</div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Calendar cells */}
-      <div className="grid grid-cols-7 gap-1 text-center text-sm">
-        {calendarCells.map(({ label, faded, bold, active, error }, i) => (
+      {/* Deadline List */}
+      <div className="px-5 pb-4 pt-1">
+        {deadlines.map((dl, idx) => (
           <div
-            key={i}
-            className={`p-1 relative ${
-              active
-                ? "bg-primary text-white rounded-full font-black"
-                : faded
-                ? "text-outline/30"
-                : bold
-                ? "font-bold"
-                : error
-                ? "font-bold text-error"
-                : ""
+            key={dl.title}
+            className={`flex items-center gap-3 py-3 ${
+              idx !== deadlines.length - 1 ? "border-b border-[#e4e1ed]" : ""
             }`}
           >
-            {label}
-            {error && (
-              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-error rounded-full" />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Deadline items */}
-      <div className="mt-4 space-y-2">
-        {deadlines.map(({ title, date, borderColor }) => (
-          <div
-            key={title}
-            className={`flex items-center gap-2 p-2 bg-surface-container-low rounded-lg border-l-4 ${borderColor}`}
-          >
+            <div className="w-1 h-9 rounded-full flex-shrink-0" style={{ background: dl.color }} />
             <div>
-              <p className="text-xs font-bold text-on-surface">{title}</p>
-              <p className="text-[10px] text-on-surface-variant">{date}</p>
+              <p className="text-sm font-semibold text-[#1b1b23]">{dl.title}</p>
+              <span className="text-xs text-[#767586]">{dl.due}</span>
             </div>
           </div>
         ))}

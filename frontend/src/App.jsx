@@ -3,7 +3,7 @@
 import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthPage } from './pages/AuthPage';
-import { Dashboard } from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css'
 import { ResetPassword } from './pages/ResetPassword';

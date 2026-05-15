@@ -2,42 +2,62 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 
 export const AuthPage = () => {
     const [searchParams] = useSearchParams();
     const mode = searchParams.get('mode');
+    const navigate = useNavigate();
 
-    // 🧠 MENTOR TASK: Tại sao anh lại dùng useState ở đây thay vì tạo 2 page riêng biệt?
-    // Đánh đổi giữa việc dùng chung 1 page (Ternary Operator) và tách 2 page là gì?
+
     const [isLogin, setIsLogin] = useState(mode !== 'signup');
     
     // Đồng bộ state khi URL thay đổi
     useEffect(() => {
         setIsLogin(mode !== 'signup');
+        setError(''); // Xóa lỗi khi chuyển mode
     }, [mode]);
 
     // Các state để quản lý form
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    
+    // State để quản lý lỗi và trạng thái gửi form
+    const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { login, register } = useAuth();
+    const { login, register, user, loading } = useAuth();
+
+    // Nếu đã đăng nhập rồi thì không cho ở lại trang Auth nữa, đá sang Dashboard
+    useEffect(() => {
+        if (user && !loading) {
+            navigate('/dashboard');
+        }
+    }, [user, loading, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setIsSubmitting(true);
+
         try {
             if (isLogin) {
                 await login(email, password);
             } else {
                 await register(name, email, password);
             }
-        } catch (error) {
-            // 🧠 MENTOR NOTE: Ở đây anh dùng console.error, nhưng thực tế
-            // em nên hiển thị thông báo (Toast/Alert) cho user thấy lỗi gì nhé.
-            console.error('Auth error:', error);
+            // Sau khi auth thành công -> Chuyển hướng sang Dashboard
+            navigate('/dashboard');
+        } catch (err) {
+            // Lấy message lỗi từ Server trả về (Axios format)
+            const msg = err.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
+            setError(msg);
+        } finally {
+            setIsSubmitting(false);
         }
     };
+
 
 
     return (
@@ -63,8 +83,16 @@ export const AuthPage = () => {
                     </p>
                 </div>
 
+                {/* Hiển thị thông báo lỗi nếu có */}
+                {error && (
+                    <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm animate-in fade-in zoom-in duration-300">
+                        <span className="material-symbols-outlined text-[20px]">error</span>
+                        <p className="font-medium">{error}</p>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* 🧠 TOÁN TỬ 3 NGÔI: Chỉ hiện field Name nếu KHÔNG PHẢI là login */}
+                    {/*  Chỉ hiện field Name nếu KHÔNG PHẢI là login */}
                     {!isLogin && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                             <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Full Name</label>
@@ -112,9 +140,17 @@ export const AuthPage = () => {
 
                     <button 
                         type="submit"
-                        className="w-full py-4 px-4 bg-gradient-to-r from-[#4648d4] to-[#06b6d4] text-white rounded-[10px] font-bold text-base shadow-lg shadow-indigo-100 hover:shadow-indigo-200 hover:translate-y-[-1px] active:translate-y-[0px] transition-all"
+                        disabled={isSubmitting}
+                        className="w-full py-4 px-4 bg-gradient-to-r from-[#4648d4] to-[#06b6d4] text-white rounded-[10px] font-bold text-base shadow-lg shadow-indigo-100 hover:shadow-indigo-200 hover:translate-y-[-1px] active:translate-y-[0px] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        {isLogin ? 'Sign In' : 'Create Account'}
+                        {isSubmitting ? (
+                            <>
+                                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                Processing...
+                            </>
+                        ) : (
+                            isLogin ? 'Sign In' : 'Create Account'
+                        )}
                     </button>
                 </form>
 
@@ -159,4 +195,4 @@ export const AuthPage = () => {
             </div>
         </div>
     );
-};
+};

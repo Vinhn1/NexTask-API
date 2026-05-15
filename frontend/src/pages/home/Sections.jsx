@@ -61,7 +61,7 @@ export function CTABanner() {
             Tham gia 50,000+ người dùng và bắt đầu quản lý công việc chuyên nghiệp hơn.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <Link to="/auth?mode=signup" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
+            <Link to="/auth" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-indigo font-bold text-base rounded-[14px] no-underline hover:bg-white/90 transition-all">
               <Rocket size={18} /> Đăng ký miễn phí
             </Link>
             <a href="#" className="inline-flex items-center gap-2 px-6 py-4 bg-white/10 text-white font-semibold text-base rounded-[14px] no-underline border border-white/20 hover:bg-white/20 transition-all">

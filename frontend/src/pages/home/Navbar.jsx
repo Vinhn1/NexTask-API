@@ -33,7 +33,7 @@ export default function Navbar() {
         <Link to="/auth" className="text-[14px] font-semibold text-muted no-underline hover:text-primary transition-colors">
           Đăng nhập
         </Link>
-        <Link to="/auth?mode=signup">
+        <Link to="/auth">
           <BtnPrimary className="px-5 py-2.5 text-[14px] rounded-xl">
             Bắt đầu miễn phí
           </BtnPrimary>

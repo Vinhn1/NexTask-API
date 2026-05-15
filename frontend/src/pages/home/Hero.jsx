@@ -28,7 +28,7 @@ export default function Hero() {
       </p>
 
       <div className="flex justify-center items-center gap-3 mb-4 flex-wrap">
-        <Link to="/auth?mode=signup">
+        <Link to="/auth">
           <BtnPrimary className="text-base px-8 py-4">
             <Rocket size={18} /> Dùng thử miễn phí
           </BtnPrimary>

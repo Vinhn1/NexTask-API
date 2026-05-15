@@ -1,52 +1,40 @@
-export default function TopBar() {
+export default function TopBar({ name = "Alex", taskCount = 4 }) {
   return (
-    <header className="sticky top-0 w-full z-40 bg-surface border-b border-outline-variant/10 flex items-center justify-between h-14 px-4 lg:pl-64 shadow-[0_4px_20px_-10px_rgba(99,102,241,0.1)]">
-      {/* Search */}
-      <div className="flex items-center flex-1 max-w-xl">
-        <div className="relative w-full">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder="Search tasks, projects... ⌘K"
-            className="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-          />
-        </div>
+    <header className="flex items-center justify-between px-8 py-4 border-b border-[#c7c4d7] bg-[#fcf8ff]">
+      {/* Left: Greeting */}
+      <div>
+        <h1 className="text-xl font-bold text-[#1b1b23]">Chào buổi sáng, {name}! 👋</h1>
+        <p className="text-sm text-[#767586] mt-0.5">
+          Bạn có <span className="font-semibold text-[#4648d4]">{taskCount} nhiệm vụ</span> cần hoàn thành hôm nay
+        </p>
       </div>
 
-      {/* Right section */}
-      <div className="flex items-center gap-4">
+      {/* Right: Actions */}
+      <div className="flex items-center gap-3">
         {/* Pro Badge */}
-        <div className="hidden sm:flex items-center bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full gap-2">
-          <span
-            className="material-symbols-outlined text-lg"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            workspace_premium
-          </span>
-          <span className="text-xs font-bold tracking-wider">Pro Plan</span>
+        <div className="flex items-center gap-1.5 bg-[#ffdcc5] text-[#703700] px-3 py-1.5 rounded-full text-sm font-semibold">
+          <span className="material-symbols-rounded text-base leading-none">workspace_premium</span>
+          Gói Pro
         </div>
 
-        {/* Icon buttons */}
-        <div className="flex items-center gap-1">
-          {["notifications", "help", "settings"].map((icon) => (
-            <button
-              key={icon}
-              className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"
-            >
-              <span className="material-symbols-outlined">{icon}</span>
-            </button>
-          ))}
-        </div>
+        {/* Icon Buttons */}
+        {[
+          { icon: "notifications", label: "Thông báo" },
+          { icon: "help", label: "Trợ giúp" },
+          { icon: "settings", label: "Cài đặt" },
+        ].map(({ icon, label }) => (
+          <button
+            key={icon}
+            aria-label={label}
+            className="w-9 h-9 rounded-xl border border-[#c7c4d7] bg-transparent text-[#464554] flex items-center justify-center hover:bg-[#e9e6f3] transition-colors"
+          >
+            <span className="material-symbols-rounded text-xl leading-none">{icon}</span>
+          </button>
+        ))}
 
         {/* Avatar */}
-        <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-highest">
-          <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBowUEUOhmq9zR8sFUAnuZtyURqRYH2rzMTBdzHjTE6jVJcCIYl0x1Iek1jBLEq7AFaKkCtL7-S92THCEg-eztGF5OKyCsJAvh-NGkeh3JqZd86TClegoztw-lKp3OehYjwU_0L5b_gC5pQ_K6jSyrmQ5EiMNG8-4wMea8-HPDjwTceCGfD0ObTYxsBR13E2GAQ7ZEbxb36xCQOt7uk0a4cCuG8nh8F0x9i4MrtkeJ8O3fAW4XdtFqDiRSq6FMiHCYKiAhp6eyPZIky"
-            alt="Alex"
-            className="w-full h-full object-cover"
-          />
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4648d4] to-[#57dffe] flex items-center justify-center text-white text-sm font-bold flex-shrink-0 cursor-pointer">
+          AL
         </div>
       </div>
     </header>

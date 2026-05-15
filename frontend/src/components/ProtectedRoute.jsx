@@ -21,7 +21,7 @@ export default function ProtectedRoute({ children }) {
     // khiến người dùng không thể bấm nút "Back" để quay lại trang bí mật đó nữa.
     // 'state={{ from: location }}' giúp ghi nhớ trang user định vào để quay lại sau khi login (UX).
     if(!user)
-        return <Navigate to="/" state={{ from: location}} replace />
+        return <Navigate to="/auth" state={{ from: location}} replace />
     
     // TH3: Đã đăng nhập hợp lệ
     // Outlet /> là một "lỗ hổng" hoặc "vị trí đặt chỗ". 

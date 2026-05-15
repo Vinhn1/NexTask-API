@@ -1,77 +1,117 @@
 const tasks = [
   {
-    title: "Refactor UI component library",
-    subtitle: "NexTask Design System • Due 5:00 PM",
-    priority: "bg-error",
-    avatars: [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDVKUsNc8aZVlU2lMj4zw8Vavbua3UjWyK14a1d-qx3coPClszsa0Q0ij3o3mSJKmjPzfqDc8VcuI8imAwJgyPqHasmYQx3X7ErbuElbQn885BZKPKN_ew_4izBi4WCYDC_KU8jXK6JEjvEP6Nd3VdW9PxHceM5oZ3aR0Sy_4uSwLWTOGIXWNsS7EtaPPTs102yF3bUrGgeB0Kxa2QWRXHp6q6eWQFsCxw6uM1Rf83I-kLbnIGs4MVKohsRExBDRDGQs77AlTslAwEv",
-    ],
+    id: 1,
+    title: "Refactor thư viện UI component",
+    meta: "NexTask Design System · hạn 5:00 CH",
+    done: false,
+    priorityColor: "#ba1a1a",
+    tagBg: "#ffdad6",
+    tagColor: "#93000a",
+    tagLabel: "Khẩn",
   },
   {
-    title: "Weekly team sync & roadmap",
-    subtitle: "General • Today at 2:00 PM",
-    priority: "bg-tertiary",
-    avatars: [
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBHghAUWp00n9LDuAnsKbJgjAmX_MSW4N6zJf3VrVivw9vCrwLlSAGZv4vzjr5fChTi0tNBjeEAC9Sb1tW9gAty3qArPd1jcQovPiKuDGL5Qt47FJwXXgGCZKnJwJqwUAgB4Luc--G7vBbHadWNutLLDup-Vxdk8P7ZjPYwvTonpLRgY3FrrIH5hynTA89zWBz20sc75Nh0XmuNiI9QT-1RVaY_ZarXXMwUBpVzoJGiIMJMBVi9Snqu0mGuPluy4M4TnpeqkkSl-doJ",
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDXFGD4Qez0j9dHxyjxk8yM9aWWpFePYU0bBWu20n2i96R7Bsmq83pzDZ9ZPizbvjmH7ey6fH7dGVmzxCl-TJBnqIOpz1daBW3fJ3z9u6Gq--Q3iR4JntKiibaxttq5aG7k9l4vUKymKNFm4nrnEOkuVw7_CVgEVc3K9Reu78zomue77PEVhMZ39NaGAp63Xp36ZPmEjyfVqFph-B5mOT2TXOqqReNaKh9YhfYjFJX0hYeCqblliVD7Pt10U2_htzHy4KHtpDj_vMRl",
-    ],
+    id: 2,
+    title: "Họp đồng bộ team & lộ trình",
+    meta: "Chung · hôm nay lúc 2:00 CH",
+    done: false,
+    priorityColor: "#904900",
+    tagBg: "#ffdcc5",
+    tagColor: "#703700",
+    tagLabel: "Cuộc họp",
   },
   {
-    title: "Prepare quarterly financial projections",
-    subtitle: "Finance • Tomorrow",
-    priority: "bg-secondary",
-    avatars: [],
+    id: 3,
+    title: "Cập nhật tài liệu API",
+    meta: "Backend team · đã xong",
+    done: true,
+    priorityColor: "#00687a",
+    tagBg: "#acedff",
+    tagColor: "#004e5c",
+    tagLabel: "Xong",
+  },
+  {
+    id: 4,
+    title: "Chuẩn bị báo cáo tài chính quý",
+    meta: "Tài chính · ngày mai",
+    done: false,
+    priorityColor: "#767586",
+    tagBg: "#efecf8",
+    tagColor: "#464554",
+    tagLabel: "Bình thường",
   },
 ];
 
-function TaskItem({ title, subtitle, priority, avatars }) {
-  return (
-    <div className="p-4 flex items-center gap-4 group hover:bg-surface-container-low transition-colors">
-      <button className="w-6 h-6 border-2 border-outline-variant rounded-full flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
-        <span className="material-symbols-outlined text-base text-transparent group-hover:text-outline-variant">
-          check
-        </span>
-      </button>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-on-surface truncate">{title}</h4>
-        <p className="text-xs text-on-surface-variant">{subtitle}</p>
-      </div>
-      <div className="flex items-center gap-4 shrink-0">
-        <span className={`w-2 h-2 rounded-full ${priority}`} />
-        {avatars.length > 0 && (
-          <div className="flex -space-x-2">
-            {avatars.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt="member"
-                className="w-7 h-7 rounded-full border-2 border-surface object-cover"
-              />
-            ))}
-          </div>
-        )}
-        <button className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-surface-container-high rounded-full transition-all">
-          <span className="material-symbols-outlined text-on-surface-variant text-xl">more_vert</span>
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function TaskList() {
   return (
-    <div
-      className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/5"
-      style={{ boxShadow: "0 10px 15px -3px rgba(99,102,241,0.08), 0 4px 6px -4px rgba(99,102,241,0.08)" }}
-    >
-      <div className="p-4 border-b border-outline-variant/10 flex items-center justify-between">
-        <h3 className="text-lg font-bold text-on-surface">My Tasks Today</h3>
-        <button className="text-primary text-xs font-semibold hover:underline">View All</button>
+    <div className="bg-white rounded-2xl border border-[#e4e1ed] overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#e4e1ed]">
+        <h3 className="text-base font-bold text-[#1b1b23]">Nhiệm vụ hôm nay</h3>
+        <a href="#" className="text-sm font-semibold text-[#4648d4] hover:underline">
+          Xem tất cả
+        </a>
       </div>
-      <div className="divide-y divide-outline-variant/5">
-        {tasks.map((task) => (
-          <TaskItem key={task.title} {...task} />
-        ))}
+
+      {/* Task Items */}
+      {tasks.map((task, idx) => (
+        <div
+          key={task.id}
+          className={`flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-[#f5f2fe] transition-colors ${
+            idx !== tasks.length - 1 ? "border-b border-[#e4e1ed]" : ""
+          }`}
+        >
+          {/* Checkbox */}
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+              task.done
+                ? "border-[#4648d4] bg-[#e1e0ff]"
+                : "border-[#c7c4d7] hover:border-[#4648d4]"
+            }`}
+          >
+            {task.done && (
+              <span className="material-symbols-rounded text-sm text-[#4648d4] leading-none">
+                check
+              </span>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <p
+              className={`text-sm font-semibold truncate ${
+                task.done ? "line-through text-[#767586]" : "text-[#1b1b23]"
+              }`}
+            >
+              {task.title}
+            </p>
+            <span className="text-xs text-[#767586] mt-0.5 block">{task.meta}</span>
+          </div>
+
+          {/* Meta: priority dot + tag */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ background: task.priorityColor }}
+            />
+            <span
+              className="text-xs px-2.5 py-1 rounded-full font-semibold"
+              style={{ background: task.tagBg, color: task.tagColor }}
+            >
+              {task.tagLabel}
+            </span>
+          </div>
+        </div>
+      ))}
+
+      {/* Sprint Progress */}
+      <div className="px-6 py-4 border-t border-[#e4e1ed] bg-[#fcf8ff]/50">
+        <div className="flex justify-between text-sm font-medium text-[#464554] mb-2">
+          <span>Mobile App v2.0 — tiến độ sprint</span>
+          <span className="text-[#4648d4] font-bold">68%</span>
+        </div>
+        <div className="h-2 bg-[#e1e0ff] rounded-full overflow-hidden">
+          <div className="h-full bg-[#4648d4] rounded-full transition-all duration-700" style={{ width: "68%" }} />
+        </div>
       </div>
     </div>
   );
