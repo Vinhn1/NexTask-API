@@ -10,13 +10,20 @@ export function Stats() {
     { val: "35%",   label: "Time Saved",        color: C.cyan },
   ];
   return (
-    <section style={{ margin: "64px 32px 0" }}>
-      <Card style={{ padding: "32px 48px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", textAlign: "center" }}>
+    <section className="mt-16 mx-8">
+      <Card className="px-12 py-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 text-center">
           {stats.map((s, i) => (
-            <div key={s.label} style={{ borderLeft: i > 0 ? "1px solid #f0edf8" : "none" }}>
-              <div style={{ fontSize: 36, fontWeight: 900, color: s.color, letterSpacing: "-1px" }}>{s.val}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>{s.label}</div>
+            <div key={s.label} className={`py-4 md:py-0 ${i > 0 ? 'md:border-l border-[#f0edf8]' : ''} ${i === 2 ? 'border-l md:border-l' : ''} ${i % 2 === 0 ? '' : 'border-l border-[#f0edf8] md:border-l'}`}>
+              <div 
+                className="text-4xl font-black tracking-tight" 
+                style={{ color: s.color }}
+              >
+                {s.val}
+              </div>
+              <div className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>

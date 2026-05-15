@@ -5,42 +5,35 @@ const NAV_LINKS = ["Tính năng", "Bảng giá", "Tài liệu", "Blog"];
 
 export default function Navbar() {
   return (
-    <nav style={{
-      position: "sticky", top: 0, zIndex: 100,
-      background: "rgba(252,248,255,0.88)", backdropFilter: "blur(20px)",
-      borderBottom: `1px solid ${C.border}`,
-      padding: "0 32px", height: 64,
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-    }}>
+    <nav className="sticky top-0 z-[100] bg-surface/88 backdrop-blur-xl border-b border-border px-8 h-16 flex items-center justify-between">
       {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: `linear-gradient(135deg,${C.indigo},${C.cyan})`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <span style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>N</span>
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-cyan flex items-center justify-center">
+          <span className="text-white font-black text-lg">N</span>
         </div>
-        <span style={{ fontWeight: 900, fontSize: 20, color: C.indigo, letterSpacing: "-0.5px" }}>NexTask</span>
+        <span className="font-black text-xl text-primary tracking-tight">NexTask</span>
       </div>
 
       {/* Nav links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 28, fontSize: 14, fontWeight: 600 }}>
+      <div className="flex items-center gap-7 text-[14px] font-semibold">
         {NAV_LINKS.map(l => (
-          <a key={l} href="#" style={{ color: C.muted, textDecoration: "none", transition: "color 0.15s" }}
-            onMouseEnter={e => e.currentTarget.style.color = C.indigo}
-            onMouseLeave={e => e.currentTarget.style.color = C.muted}
-          >{l}</a>
+          <a 
+            key={l} 
+            href="#" 
+            className="text-muted no-underline transition-colors duration-150 hover:text-primary"
+          >
+            {l}
+          </a>
         ))}
       </div>
 
       {/* Auth */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <a href="#" style={{ fontSize: 14, fontWeight: 600, color: C.muted, textDecoration: "none" }}>Đăng nhập</a>
-        <BtnPrimary style={{ padding: "10px 20px", fontSize: 14, borderRadius: 10 }}>
+      <div className="flex items-center gap-3">
+        <a href="#" className="text-[14px] font-semibold text-muted no-underline hover:text-primary transition-colors">Đăng nhập</a>
+        <BtnPrimary className="px-5 py-2.5 text-[14px] rounded-xl">
           Bắt đầu miễn phí
         </BtnPrimary>
       </div>
     </nav>
   );
-}
+}

@@ -5,12 +5,15 @@ import { BtnGhost } from "@/components/ui/Button";
 // ── Feature card (used in bento grid) ─────────────────────────
 export function FeatureCard({ icon, iconBg, title, desc }) {
   return (
-    <Card style={{ padding: 32 }}>
-      <div style={{ width: 48, height: 48, background: iconBg, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+    <Card className="p-8">
+      <div 
+        className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" 
+        style={{ backgroundColor: iconBg }}
+      >
         {icon}
       </div>
-      <h3 style={{ fontSize: 18, fontWeight: 900, color: "#1b1b23", marginBottom: 8 }}>{title}</h3>
-      <p style={{ fontSize: 14, color: "#464554", lineHeight: 1.6, fontWeight: 500 }}>{desc}</p>
+      <h3 className="text-[18px] font-black text-dark mb-2">{title}</h3>
+      <p className="text-[14px] text-muted leading-relaxed font-medium">{desc}</p>
     </Card>
   );
 }
@@ -26,31 +29,46 @@ export function PricingTier({
 }) {
   return (
     <>
-      <div style={{ fontSize: 13, fontWeight: 700, color: planColor, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>{plan}</div>
-      <div style={{ fontSize: 40, fontWeight: 900, color: priceColor, marginBottom: 4 }}>{price}</div>
-      <div style={{ fontSize: 13, color: subColor, marginBottom: 24 }}>{priceSub}</div>
+      <div 
+        className="text-[13px] font-bold uppercase tracking-[0.1em] mb-3" 
+        style={{ color: planColor }}
+      >{plan}</div>
+      <div 
+        className="text-[40px] font-black mb-1" 
+        style={{ color: priceColor }}
+      >{price}</div>
+      <div 
+        className="text-[13px] mb-6 font-medium" 
+        style={{ color: subColor }}
+      >{priceSub}</div>
 
-      <div style={{ borderTop: `1px solid ${dividerColor}`, paddingTop: 24, display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+      <div 
+        className="border-t pt-6 flex flex-col gap-3 mb-7" 
+        style={{ borderColor: dividerColor }}
+      >
         {features.map(f => (
-          <div key={f} style={{ display: "flex", gap: 8, fontSize: 14, color: featureColor, alignItems: "flex-start" }}>
-            <Check size={16} color="#10b981" style={{ flexShrink: 0, marginTop: 2 }} /> {f}
+          <div key={f} className="flex gap-2 text-[14px] items-start font-medium" style={{ color: featureColor }}>
+            <Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> {f}
           </div>
         ))}
         {missing.map(f => (
-          <div key={f} style={{ display: "flex", gap: 8, fontSize: 14, color: "#aaa", alignItems: "flex-start" }}>
-            <X size={16} color="#ddd" style={{ flexShrink: 0, marginTop: 2 }} /> {f}
+          <div key={f} className="flex gap-2 text-[14px] text-slate-400 items-start font-medium">
+            <X size={16} className="text-slate-200 shrink-0 mt-0.5" /> {f}
           </div>
         ))}
       </div>
 
       {btnStyle === "ghost" && (
-        <BtnGhost style={{ width: "100%", justifyContent: "center", padding: 14 }}>{btnLabel}</BtnGhost>
+        <BtnGhost className="w-full justify-center py-3.5">{btnLabel}</BtnGhost>
       )}
       {btnStyle === "dark" && (
-        <a href="#" style={{ display: "block", padding: 14, background: "transparent", color: "#94a3b8", fontWeight: 700, fontSize: 15, borderRadius: 12, textAlign: "center", textDecoration: "none", border: "1px solid #334155" }}>
+        <a 
+          href="#" 
+          className="block py-3.5 bg-transparent text-slate-400 font-bold text-[15px] rounded-xl text-center no-underline border border-slate-700 hover:bg-slate-800 transition-colors"
+        >
           {btnLabel}
         </a>
       )}
     </>
   );
-}
+}

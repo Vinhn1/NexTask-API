@@ -5,49 +5,38 @@ import KanbanCol from "./KanbanCol";
 
 export default function DashboardMockup() {
   return (
-    <div style={{ position: "relative", maxWidth: 900, margin: "64px auto 0" }}>
+    <div className="relative max-w-[900px] mx-auto mt-16">
       {/* Main dashboard frame */}
-      <div style={{
-        background: "#fff",
-        borderRadius: "24px",
-        border: `1px solid ${C.border}`,
-        boxShadow: "0 40px 100px -20px rgba(70,72,212,0.15)",
-        padding: "24px",
-        overflow: "hidden",
-      }}>
-        <div style={{ display: "flex", gap: 24 }}>
+      <div className="bg-white rounded-[24px] border border-border shadow-[0_40px_100px_-20px_rgba(70,72,212,0.15)] p-6 overflow-hidden">
+        <div className="flex gap-6">
           {/* Sidebar mock */}
-          <div style={{ width: 160, flexShrink: 0, borderRight: `1px solid ${C.border}`, paddingRight: 20 }}>
-            <div style={{ height: 24, width: 80, background: "#f0edf8", borderRadius: 6, marginBottom: 24 }} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="w-[160px] shrink-0 border-r border-border pr-5">
+            <div className="h-6 w-20 bg-subtle rounded-md mb-6" />
+            <div className="flex flex-col gap-3">
               {[
                 { label: "Dashboard", active: true },
                 { label: "My Tasks" },
                 { label: "Team" },
                 { label: "Analytics" },
               ].map(item => (
-                <div key={item.label} style={{
-                  fontSize: 12, fontWeight: 700,
-                  color: item.active ? C.indigo : "#888",
-                  display: "flex", alignItems: "center", gap: 8
-                }}>
-                  <div style={{ width: 4, height: 4, borderRadius: "50%", background: item.active ? C.indigo : "transparent" }} />
+                <div key={item.label} className={`text-[12px] font-bold flex items-center gap-2 ${item.active ? "text-primary" : "text-[#888]"}`}>
+                  <div className={`w-1 h-1 rounded-full ${item.active ? "bg-primary" : "bg-transparent"}`} />
                   {item.label}
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: 40 }}>
-              <div style={{ fontSize: 10, fontWeight: 800, color: "#aaa", textTransform: "uppercase", marginBottom: 12 }}>Projects</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="mt-10">
+              <div className="text-[10px] font-extrabold text-[#aaa] uppercase mb-3">Projects</div>
+              <div className="flex flex-col gap-1.5">
                 {[
                   { c: C.indigo, t: "Website Redesign" },
                   { c: C.green, t: "Mobile App v2" },
                   { c: C.amber, t: "Q4 Marketing" },
                 ].map(p => (
-                  <div key={p.t} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.c }} />
-                    <span style={{ fontSize: 11, color: "#555", fontWeight: 500 }}>{p.t}</span>
+                  <div key={p.t} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.c }} />
+                    <span className="text-[11px] text-[#555] font-medium">{p.t}</span>
                   </div>
                 ))}
               </div>
@@ -55,20 +44,20 @@ export default function DashboardMockup() {
           </div>
 
           {/* Content area mock */}
-          <div style={{ flex: 1 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+          <div className="flex-1">
+            <div className="grid grid-cols-3 gap-2.5">
               <KanbanCol
                 title="Backlog" count={4} dot="#94a3b8"
                 titleColor="#666" countBg="#e2e8f0" countColor="#64748b"
                 cards={[
                   {
                     title: "Redesign onboarding flow",
-                    badge: <Pill variant="amber" style={{ fontSize: 10, padding: "2px 8px" }}>High</Pill>,
+                    badge: <Pill variant="amber" className="text-[10px] px-2 py-0.5">High</Pill>,
                     sub: "Due Dec 20"
                   },
                   {
                     title: "Update privacy policy",
-                    badge: <Pill variant="green" style={{ fontSize: 10, padding: "2px 8px" }}>Low</Pill>,
+                    badge: <Pill variant="green" className="text-[10px] px-2 py-0.5">Low</Pill>,
                     sub: "No deadline"
                   }
                 ]}
@@ -80,19 +69,19 @@ export default function DashboardMockup() {
                   {
                     title: "Fix payment gateway bug",
                     bordered: true,
-                    badge: <Pill style={{ background: "#fee2e2", color: "#b91c1c", border: "none", fontSize: 10, padding: "2px 8px" }}>Urgent</Pill>,
+                    badge: <Pill className="bg-red-100 text-red-700 border-none text-[10px] px-2 py-0.5">Urgent</Pill>,
                     extra: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 6 }}>
-                        <div style={{ width: 18, height: 18, borderRadius: "50%", background: C.indigo, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: 8, color: "#fff", fontWeight: 700 }}>SK</span>
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <div className="w-[18px] h-[18px] rounded-full bg-primary flex items-center justify-center">
+                          <span className="text-[8px] text-white font-bold">SK</span>
                         </div>
-                        <span style={{ fontSize: 10, color: "#888" }}>Dec 18</span>
+                        <span className="text-[10px] text-[#888]">Dec 18</span>
                       </div>
                     )
                   },
                   {
                     title: "API docs update",
-                    badge: <Pill variant="indigo" style={{ fontSize: 10, padding: "2px 8px" }}>Medium</Pill>,
+                    badge: <Pill variant="indigo" className="text-[10px] px-2 py-0.5">Medium</Pill>,
                     sub: "Dec 22"
                   }
                 ]}
@@ -109,7 +98,7 @@ export default function DashboardMockup() {
           </div>
         </div>
       </div>
-
-      </div>
+    </div>
   );
 }
+

@@ -6,15 +6,14 @@ import { PricingTier } from "@/components/landing/LandingParts";
 
 export default function Pricing() {
   return (
-    <section style={{ padding: "72px 32px" }}>
-      <div style={{ textAlign: "center", marginBottom: 48 }}>
+    <section className="py-18 px-8">
+      <div className="text-center mb-12">
         <SectionLabel>Bảng giá</SectionLabel>
-        <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-1px" }}>Minh bạch, không bất ngờ</h2>
+        <h2 className="text-4xl font-black tracking-tight">Minh bạch, không bất ngờ</h2>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20 }}>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Free */}
-        <Card style={{ padding: 32 }}>
+        <Card className="p-8">
           <PricingTier
             plan="Free" planColor="#888" price="$0" priceSub="mãi mãi"
             features={["5 thành viên", "3 boards", "5GB storage"]}
@@ -24,28 +23,28 @@ export default function Pricing() {
         </Card>
 
         {/* Pro */}
-        <div style={{ padding: 32, background: C.indigo, borderRadius: 20, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: 120, background: "rgba(255,255,255,0.06)", borderRadius: "50%", transform: "translate(30px,-30px)" }} />
-          <div style={{ position: "absolute", top: 12, right: 16 }}>
-            <Pill variant="white" style={{ fontSize: 10, padding: "4px 10px" }}>Phổ biến nhất</Pill>
+        <div className="p-8 bg-indigo rounded-[20px] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-white/5 rounded-full translate-x-[30px] -translate-y-[30px]" />
+          <div className="absolute top-3 right-4">
+            <Pill variant="white" className="text-[10px] px-2.5 py-1">Phổ biến nhất</Pill>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Pro</div>
-          <div style={{ fontSize: 40, fontWeight: 900, color: "#fff", marginBottom: 4 }}>$12</div>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 24 }}>/user/tháng</div>
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 24, display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+          <div className="text-[13px] font-bold text-white/60 uppercase tracking-widest mb-3">Pro</div>
+          <div className="text-[40px] font-black text-white mb-1">$12</div>
+          <div className="text-[13px] text-white/60 mb-6">/user/tháng</div>
+          <div className="border-t border-white/15 pt-6 flex flex-col gap-3 mb-7">
             {["Không giới hạn thành viên","Không giới hạn boards","50GB storage","AI features + Integrations"].map(f => (
-              <div key={f} style={{ display: "flex", gap: 8, fontSize: 14, color: "#fff" }}>
-                <Check size={16} color="#6ee7b7" style={{ flexShrink: 0, marginTop: 2 }} /> {f}
+              <div key={f} className="flex gap-2 text-sm text-white items-start">
+                <Check size={16} className="text-emerald-300 shrink-0 mt-0.5" /> {f}
               </div>
             ))}
           </div>
-          <a href="#" style={{ display: "block", padding: 14, background: "#fff", color: C.indigo, fontWeight: 700, fontSize: 15, borderRadius: 12, textAlign: "center", textDecoration: "none" }}>
+          <a href="#" className="block p-3.5 bg-white text-indigo font-bold text-[15px] rounded-xl text-center no-underline hover:bg-white/90 transition-colors">
             Dùng thử 14 ngày
           </a>
         </div>
 
         {/* Enterprise */}
-        <Card style={{ padding: 32, background: "#0f172a", border: "none" }}>
+        <Card className="p-8 bg-[#0f172a] border-none">
           <PricingTier
             plan="Enterprise" planColor="#64748b" price="Custom" priceSub="liên hệ báo giá"
             priceColor="#f1f5f9" subColor="#64748b"

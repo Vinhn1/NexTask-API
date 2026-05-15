@@ -1,24 +1,17 @@
 import { C } from "@/constants/brand";
 
-export function Card({ children, style = {} }) {
+export function Card({ children, className = "", ...props }) {
   return (
-    <div style={{
-      background: "#fff", borderRadius: 20,
-      border: `1px solid ${C.border}`, ...style,
-    }}>
+    <div className={`bg-white rounded-[20px] border border-border ${className}`} {...props}>
       {children}
     </div>
   );
 }
 
-export function SectionLabel({ children }) {
+export function SectionLabel({ children, className = "", ...props }) {
   return (
-    <span style={{
-      fontSize: 12, fontWeight: 700, letterSpacing: "0.15em",
-      textTransform: "uppercase", color: C.indigo,
-      display: "block", marginBottom: 12,
-    }}>
+    <span className={`text-[12px] font-bold tracking-[0.15em] uppercase text-primary block mb-3 ${className}`} {...props}>
       {children}
     </span>
   );
-}
+}

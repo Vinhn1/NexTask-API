@@ -1,51 +1,25 @@
 import { C } from "@/constants/brand";
 
-export function BtnPrimary({ children, style = {}, href = "#" }) {
+export function BtnPrimary({ children, className = "", href = "#", ...props }) {
   return (
     <a
       href={href}
-      style={{
-        display: "inline-flex", alignItems: "center", gap: 8,
-        padding: "15px 30px", background: C.indigo, color: "#fff",
-        fontWeight: 700, fontSize: 15, borderRadius: 14, textDecoration: "none",
-        transition: "transform 0.15s, box-shadow 0.15s", ...style,
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = "0 8px 24px rgba(70,72,212,0.35)";
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = "";
-        e.currentTarget.style.boxShadow = "";
-      }}
+      className={`inline-flex items-center gap-2 px-[30px] py-[15px] bg-primary text-white font-bold text-[15px] rounded-[14px] no-underline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(70,72,212,0.35)] ${className}`}
+      {...props}
     >
       {children}
     </a>
   );
 }
 
-export function BtnGhost({ children, style = {}, href = "#" }) {
+export function BtnGhost({ children, className = "", href = "#", ...props }) {
   return (
     <a
       href={href}
-      style={{
-        display: "inline-flex", alignItems: "center", gap: 8,
-        padding: "15px 24px", background: "transparent", color: C.dark,
-        fontWeight: 600, fontSize: 15, borderRadius: 14, textDecoration: "none",
-        border: `1.5px solid ${C.border}`, transition: "all 0.15s", ...style,
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background = "#f5f2fe";
-        e.currentTarget.style.borderColor = C.indigo;
-        e.currentTarget.style.color = C.indigo;
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.borderColor = C.border;
-        e.currentTarget.style.color = C.dark;
-      }}
+      className={`inline-flex items-center gap-2 px-6 py-[15px] bg-transparent text-dark font-semibold text-[15px] rounded-[14px] no-underline border-[1.5px] border-border transition-all duration-150 hover:bg-subtle hover:border-primary hover:text-primary ${className}`}
+      {...props}
     >
       {children}
     </a>
   );
-}
+}

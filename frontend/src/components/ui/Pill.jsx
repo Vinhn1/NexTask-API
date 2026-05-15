@@ -1,22 +1,16 @@
 import { C } from "@/constants/brand";
 
-const variants = {
-  indigo: { background: "#eef0fd", color: C.indigo, border: "1px solid #c7c9f5" },
-  amber:  { background: "#fef3e2", color: "#b45309", border: "1px solid #fcd38d" },
-  green:  { background: "#eaf3de", color: "#3b6d11", border: "1px solid #c0dd97" },
-  red:    { background: "#fee2e2", color: "#b91c1c", border: "none" },
-  white:  { background: "rgba(255,255,255,0.15)", color: "#fff", border: "none" },
+const variantClasses = {
+  indigo: "bg-[#eef0fd] text-primary border border-[#c7c9f5]",
+  amber:  "bg-[#fef3e2] text-[#b45309] border border-[#fcd38d]",
+  green:  "bg-[#eaf3de] text-[#3b6d11] border border-[#c0dd97]",
+  red:    "bg-[#fee2e2] text-[#b91c1c] border-none",
+  white:  "bg-white/15 text-white border-none",
 };
 
-export default function Pill({ children, variant = "indigo", style = {} }) {
+export default function Pill({ children, variant = "indigo", className = "", ...props }) {
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 6,
-      padding: "5px 14px", borderRadius: 999,
-      fontSize: 11, fontWeight: 700,
-      letterSpacing: "0.05em", textTransform: "uppercase",
-      ...variants[variant], ...style,
-    }}>
+    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold tracking-wider uppercase ${variantClasses[variant]} ${className}`} {...props}>
       {children}
     </span>
   );

@@ -5,41 +5,41 @@ import { FeatureCard } from "@/components/landing/LandingParts";
 
 export default function Features() {
   return (
-    <section style={{ padding: "72px 32px" }}>
-      <div style={{ textAlign: "center", marginBottom: 48 }}>
+    <section className="py-[72px] px-8">
+      <div className="text-center mb-12">
         <SectionLabel>Tính năng cốt lõi</SectionLabel>
-        <h2 style={{ fontSize: 42, fontWeight: 900, letterSpacing: "-1px", color: "#1b1b23" }}>
+        <h2 className="text-[42px] font-black tracking-tighter text-dark leading-tight">
           Được xây dựng cho <br />tương lai của làm việc nhóm
         </h2>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "auto auto", gap: 16 }}>
+      <div className="grid grid-cols-3 auto-rows-auto gap-4">
 
         {/* Kanban Smart — 2 cols */}
-        <Card style={{ gridColumn: "span 2", padding: 40, display: "flex", gap: 40, alignItems: "center" }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ width: 52, height: 52, background: "#eef0fd", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-              <Kanban size={24} color={C.indigo} />
+        <Card className="col-span-2 p-10 flex gap-10 items-center">
+          <div className="flex-1">
+            <div className="w-[52px] h-[52px] bg-subtle rounded-[14px] flex items-center justify-center mb-5">
+              <Kanban size={24} className="text-primary" />
             </div>
-            <h3 style={{ fontSize: 24, fontWeight: 900, color: "#1b1b23", marginBottom: 10 }}>Kanban Thông Minh</h3>
-            <p style={{ fontSize: 15, color: C.muted, lineHeight: 1.6, fontWeight: 500 }}>
+            <h3 className="text-2xl font-black text-dark mb-2.5">Kanban Thông Minh</h3>
+            <p className="text-[15px] text-muted leading-relaxed font-medium">
               Tự động hóa luồng công việc với AI. Kéo thả trực quan, cập nhật realtime và phân loại task thông minh.
             </p>
-            <a href="#" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: C.indigo, fontWeight: 700, fontSize: 14, textDecoration: "none", marginTop: 16 }}>
+            <a href="#" className="inline-flex items-center gap-1.5 text-primary font-bold text-[14px] no-underline mt-4 hover:gap-2 transition-all">
               Xem thêm <ArrowRight size={14} />
             </a>
           </div>
           {/* Mini kanban visual */}
-          <div style={{ width: 240, flexShrink: 0, background: "#f8f6ff", borderRadius: 12, padding: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div className="w-[240px] shrink-0 bg-[#f8f6ff] rounded-xl p-3 grid grid-cols-2 gap-2">
             {[
-              { bg: "#fff", border: `1px solid ${C.border}`, bars: ["#eef0fd", "#f0edf8", "#f0edf8"], widths: ["60%","100%","80%"] },
-              { bg: C.indigo, bars: ["rgba(255,255,255,0.4)","rgba(255,255,255,0.2)","rgba(255,255,255,0.2)"], widths: ["60%","100%","70%"] },
-              { bg: "#fff", border: `1px solid ${C.border}`, bars: ["#d1fae5","#f0edf8"], widths: ["70%","90%"] },
-              { bg: "#fff", border: `1px solid ${C.border}`, bars: ["#fef3e2","#f0edf8"], widths: ["50%","80%"] },
+              { bg: "bg-white", border: "border-border", bars: ["bg-subtle", "bg-[#f0edf8]", "bg-[#f0edf8]"], widths: ["w-[60%]","w-full","w-[80%]"] },
+              { bg: "bg-primary", bars: ["bg-white/40","bg-white/20","bg-white/20"], widths: ["w-[60%]","w-full","w-[70%]"] },
+              { bg: "bg-white", border: "border-border", bars: ["bg-emerald-100","bg-[#f0edf8]"], widths: ["w-[70%]","w-[90%]"] },
+              { bg: "bg-white", border: "border-border", bars: ["bg-amber-100","bg-[#f0edf8]"], widths: ["w-[50%]","w-[80%]"] },
             ].map((card, i) => (
-              <div key={i} style={{ background: card.bg, borderRadius: 8, padding: 8, border: card.border }}>
+              <div key={i} className={`${card.bg} rounded-lg p-2 border ${card.border || 'border-transparent'}`}>
                 {card.bars.map((b, j) => (
-                  <div key={j} style={{ width: card.widths[j], height: 6, background: b, borderRadius: 4, marginBottom: j < card.bars.length - 1 ? 6 : 0 }} />
+                  <div key={j} className={`${card.widths[j]} h-1.5 ${b} rounded-full ${j < card.bars.length - 1 ? "mb-1.5" : ""}`} />
                 ))}
               </div>
             ))}
@@ -47,37 +47,37 @@ export default function Features() {
         </Card>
 
         {/* Realtime Sync */}
-        <Card style={{ padding: 32, background: `linear-gradient(135deg,${C.indigo} 0%,${C.cyan} 100%)`, border: "none" }}>
-          <div style={{ width: 48, height: 48, background: "rgba(255,255,255,0.15)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-            <Zap size={22} color="#fff" />
+        <Card className="p-8 bg-gradient-to-br from-primary to-cyan border-none">
+          <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center mb-4">
+            <Zap size={22} className="text-white" />
           </div>
-          <h3 style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 10 }}>Real-time Sync</h3>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", lineHeight: 1.6, fontWeight: 500 }}>
+          <h3 className="text-xl font-black text-white mb-2.5">Real-time Sync</h3>
+          <p className="text-[14px] text-white/80 leading-relaxed font-medium">
             Mọi thay đổi đồng bộ tức thì trên tất cả thiết bị và thành viên.
           </p>
-          <div style={{ marginTop: 20, display: "flex" }}>
+          <div className="mt-5 flex">
             {[
-              { i: "SK", bg: "#a5b4fc", c: "#3730a3" },
-              { i: "MR", bg: "#6ee7b7", c: "#065f46" },
-              { i: "AL", bg: "#fcd38d", c: "#92400e" },
-              { i: "+5", bg: "rgba(255,255,255,0.2)", c: "#fff" },
+              { i: "SK", bg: "bg-indigo-300", c: "text-indigo-900" },
+              { i: "MR", bg: "bg-emerald-300", c: "text-emerald-900" },
+              { i: "AL", bg: "bg-amber-300", c: "text-amber-900" },
+              { i: "+5", bg: "bg-white/20", c: "text-white" },
             ].map((av, idx) => (
-              <div key={av.i} style={{
-                width: 28, height: 28, borderRadius: "50%", background: av.bg,
-                border: `2px solid ${C.indigo}`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: av.c,
-                marginLeft: idx > 0 ? -8 : 0,
-              }}>{av.i}</div>
+              <div key={av.i} className={`
+                w-7 h-7 rounded-full ${av.bg}
+                border-2 border-primary
+                flex items-center justify-center
+                text-[10px] font-bold ${av.c}
+                ${idx > 0 ? "-ml-2" : "ml-0"}
+              `}>{av.i}</div>
             ))}
           </div>
         </Card>
 
         {/* Bottom cards */}
-        <FeatureCard icon={<Bot size={22} color="#0284c7" />}     iconBg="#e0f2fe" title="AI Assistant"     desc="Tự động ưu tiên và gợi ý công việc dựa trên AI." />
-        <FeatureCard icon={<LineChart size={22} color="#be185d" />} iconBg="#fce7f3" title="Analytics"        desc="Báo cáo sprint, burndown charts và velocity tracking." />
-        <FeatureCard icon={<ShieldCheck size={22} color="#059669" />} iconBg="#ecfdf5" title="Bảo mật tuyệt đối" desc="Mã hóa đầu cuối, SSO, 2FA và audit logs đầy đủ." />
+        <FeatureCard icon={<Bot size={22} className="text-sky-600" />}     iconBg="#e0f2fe" title="AI Assistant"     desc="Tự động ưu tiên và gợi ý công việc dựa trên AI." />
+        <FeatureCard icon={<LineChart size={22} className="text-pink-700" />} iconBg="#fce7f3" title="Analytics"        desc="Báo cáo sprint, burndown charts và velocity tracking." />
+        <FeatureCard icon={<ShieldCheck size={22} className="text-emerald-600" />} iconBg="#ecfdf5" title="Bảo mật tuyệt đối" desc="Mã hóa đầu cuối, SSO, 2FA và audit logs đầy đủ." />
       </div>
     </section>
   );
-}
+}

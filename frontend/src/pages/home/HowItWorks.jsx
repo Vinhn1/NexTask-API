@@ -9,26 +9,28 @@ export function HowItWorks() {
     { n: 3, bg: "#10b981",  title: "Theo dõi & hoàn thành", desc: "Dashboard realtime, báo cáo tự động và ăn mừng thành quả." },
   ];
   return (
-    <section style={{ padding: "72px 32px", background: "#fff", margin: "0 32px", borderRadius: 24, border: `1px solid ${C.border}` }}>
-      <div style={{ textAlign: "center", marginBottom: 48 }}>
+    <section className="py-18 px-8 bg-white mx-8 rounded-[24px] border border-border">
+      <div className="text-center mb-12">
         <SectionLabel>Cách hoạt động</SectionLabel>
-        <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-1px" }}>3 bước để bắt đầu</h2>
+        <h2 className="text-4xl font-black tracking-tight">3 bước để bắt đầu</h2>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+      <div className="grid grid-cols-1 md:grid-cols-3">
         {steps.map((s, i) => (
-          <div key={s.n} style={{
-            padding: 32, textAlign: "center", position: "relative",
-            borderLeft:  i > 0 ? "1px solid #f0edf8" : "none",
-            borderRight: i < 2 ? "1px solid #f0edf8" : "none",
-          }}>
+          <div key={s.n} className={`p-8 text-center relative border-l border-r border-[#f0edf8] ${i === 0 ? 'md:border-l-0' : ''} ${i === 2 ? 'md:border-r-0' : ''} ${i > 0 && i < 2 ? '' : ''}`}>
             {i < 2 && (
-              <div style={{ position: "absolute", top: 56, right: 0, width: "50%", height: 2, background: `linear-gradient(90deg,${s.bg},transparent)` }} />
+              <div 
+                className="hidden md:block absolute top-14 right-0 w-1/2 h-0.5" 
+                style={{ background: `linear-gradient(90deg, ${s.bg}, transparent)` }} 
+              />
             )}
-            <div style={{ width: 56, height: 56, background: s.bg, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24, fontWeight: 900, color: "#fff" }}>
+            <div 
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 text-2xl font-black text-white"
+              style={{ background: s.bg }}
+            >
               {s.n}
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 10 }}>{s.title}</h3>
-            <p style={{ fontSize: 14, color: C.muted, lineHeight: 1.6 }}>{s.desc}</p>
+            <h3 className="text-lg font-black mb-2.5">{s.title}</h3>
+            <p className="text-sm text-muted leading-relaxed">{s.desc}</p>
           </div>
         ))}
       </div>
