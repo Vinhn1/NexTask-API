@@ -25,10 +25,10 @@
 
 **Mục tiêu:** Đa dạng hóa phương thức đăng nhập và bảo mật tài khoản.
 
-- [ ] **Social Auth (Google & GitHub)**
+- [x] **Social Auth (Google & GitHub)**
     - Backend: Cấu hình Passport.js hoặc thư viện OAuth.
     - Frontend: Thêm nút login với Google/GitHub tại trang `AuthPage`.
-- [ ] **Forgot Password Flow**
+- [x] **Forgot Password Flow**
     - Backend: API gửi email chứa Reset Token (thời hạn 15-30p).
     - Frontend: Trang nhập email và trang đặt lại mật khẩu mới từ link email.
     - Tích hợp **Nodemailer** với dịch vụ SMTP (Gmail/SendGrid).

@@ -46,7 +46,7 @@ model User{
   // @unique đảm bảo không bao giờ có 2 người trùng email
   email String  @unique
   //  @map giúp đặt tên field trong code camelCase nhưng DB là snake_case
-  passwordHash  String  @map("password_hash")
+  passwordHash  String?  @map("password_hash")
   // Dấu ? nghĩa là Optional (có thể để trống)
   fullname  String? @map("fullname")
   avatar    String?  @map("avatar") 
@@ -56,8 +56,13 @@ model User{
   emailVerifiedAt DateTime? @map("email_verified_at")
   refreshTokenVersion Int @default(1) @map("refresh_token_version")
   
+  // Password reset fields
+  passwordResetToken   String?   @unique @map("password_reset_token")
+  passwordResetExpires DateTime? @map("password_reset_expires")
+
   // Thông tin mở rộng
   githubId String? @unique @map("github_id")
+  googleId String? @unique @map("google_id")
   bio      String? @db.Text
   jobTitle String? @map("job_title")
   department String?

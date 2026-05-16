@@ -11,6 +11,8 @@ import Team from './pages/Team';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css'
 import { ResetPassword } from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+import SocialCallback from './pages/SocialCallback';
 import HomePage from './pages/home/HomePage';
 import { Toaster } from 'react-hot-toast';
 
@@ -26,7 +28,9 @@ function App() {
             <Toaster position="top-right" reverseOrder={false} />
             <Routes>
               <Route path='/auth' element={<AuthPage />} />
-              <Route path='/resetpass' element={<ResetPassword/>} />
+              <Route path='/forgot-password' element={<ForgotPassword />} />
+              <Route path='/reset-password/:token' element={<ResetPassword/>} />
+              <Route path='/social-callback' element={<SocialCallback />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />}/>

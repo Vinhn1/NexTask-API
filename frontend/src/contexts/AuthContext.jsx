@@ -83,8 +83,26 @@ export function AuthProvider({ children }){
         return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
     }, [logout, navigate]);
 
+    const loginWithTokens = useCallback(async (accessToken, refreshToken) => {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        
+        try {
+            const res = await axios.get('/api/v1/auth/me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            setUser(res.data.data.user);
+        } catch (error) {
+            console.error("Token Login Error:", error);
+            logout();
+            throw error;
+        }
+    }, [logout]);
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, loginWithTokens }}>
             {children}
         </AuthContext.Provider>
     )

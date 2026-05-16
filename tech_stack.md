@@ -26,7 +26,9 @@
 
 ### 6. Security & Authentication
 - **JWT (JSON Web Tokens):** For stateless authentication.
-- **Argon2:** The winner of the Password Hashing Competition. More secure than bcrypt for modern hardware.
+- **Bcrypt:** Industry-standard password hashing algorithm.
+- **Passport.js:** Middleware for Google & GitHub Social Authentication.
+- **Nodemailer:** Powerful utility to send transactional emails (Forgot Password flow).
 - **Helmet.js:** To secure Express apps by setting various HTTP headers.
 
 ### 7. Performance & Scaling

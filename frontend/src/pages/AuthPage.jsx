@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
@@ -7,32 +5,30 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 export const AuthPage = () => {
     const [searchParams] = useSearchParams();
     const mode = searchParams.get('mode');
+    const errorParam = searchParams.get('error');
     const navigate = useNavigate();
-
 
     const [isLogin, setIsLogin] = useState(mode !== 'signup');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Đồng bộ state khi URL thay đổi
+    // Sync state when URL changes
     useEffect(() => {
-        const timeoutId = window.setTimeout(() => {
-            setIsLogin(mode !== 'signup');
-            setError('');
-        }, 0);
+        setIsLogin(mode !== 'signup');
+        setError('');
+        if (errorParam === 'social_failed') {
+            setError('Social login failed. Please try again.');
+        } else if (errorParam === 'missing_tokens') {
+            setError('Authentication failed: missing tokens.');
+        }
+    }, [mode, errorParam]);
 
-        return () => window.clearTimeout(timeoutId);
-    }, [mode]);
-
-    // Các state để quản lý form
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     
-    // State để quản lý lỗi và trạng thái gửi form
     const { login, register, user, loading } = useAuth();
 
-    // Nếu đã đăng nhập rồi thì không cho ở lại trang Auth nữa, đá sang Dashboard
     useEffect(() => {
         if (user && !loading) {
             navigate('/dashboard');
@@ -50,22 +46,22 @@ export const AuthPage = () => {
             } else {
                 await register(name, email, password);
             }
-            // Sau khi auth thành công -> Chuyển hướng sang Dashboard
             navigate('/dashboard');
         } catch (err) {
-            // Lấy message lỗi từ Server trả về (Axios format)
-            const msg = err.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại.';
+            const msg = err.response?.data?.message || 'Something went wrong, please try again.';
             setError(msg);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-
+    const handleSocialLogin = (provider) => {
+        // Sử dụng đường dẫn tương đối để tận dụng Proxy đã cấu hình trong vite.config.js
+        window.location.href = `/api/v1/auth/${provider}`;
+    };
 
     return (
         <div className="min-h-screen bg-[#fcf8ff] flex items-center justify-center p-4 font-inter relative overflow-hidden">
-            {/* Background elements for premium feel (Glassmorphism & Gradients) */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none -z-10">
                 <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-indigo-100/50 rounded-full blur-[120px]"></div>
                 <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-cyan-100/50 rounded-full blur-[120px]"></div>
@@ -79,14 +75,13 @@ export const AuthPage = () => {
                         </svg>
                     </Link>
                     <h1 className="text-3xl font-extrabold text-[#1b1b23] tracking-tight mb-2">
-                        {isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản mới'}
+                        {isLogin ? 'Welcome back' : 'Create new account'}
                     </h1>
                     <p className="text-[#464554] text-sm">
-                        {isLogin ? 'Nhập thông tin để truy cập vào NexTask' : 'Tham gia NexTask và bắt đầu quản lý công việc hiệu quả'}
+                        {isLogin ? 'Enter your details to access NexTask' : 'Join NexTask and start managing your tasks efficiently'}
                     </p>
                 </div>
 
-                {/* Hiển thị thông báo lỗi nếu có */}
                 {error && (
                     <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm animate-in fade-in zoom-in duration-300">
                         <span className="material-symbols-rounded text-[20px]">error</span>
@@ -95,15 +90,14 @@ export const AuthPage = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/*  Chỉ hiện field Name nếu KHÔNG PHẢI là login */}
                     {!isLogin && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                            <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Họ và tên</label>
+                            <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Full Name</label>
                             <input 
                                 type="text" 
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Nguyễn Văn A"
+                                placeholder="John Doe"
                                 className="w-full px-4 py-3 rounded-[10px] border border-slate-200 focus:border-[#4648d4] focus:ring-4 focus:ring-[#4648d4]/10 outline-none transition-all placeholder:text-slate-400"
                                 required
                             />
@@ -111,7 +105,7 @@ export const AuthPage = () => {
                     )}
 
                     <div>
-                        <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Địa chỉ Email</label>
+                        <label className="block text-sm font-semibold text-[#1b1b23] mb-1.5 ml-1">Email Address</label>
                         <input 
                             type="email" 
                             value={email}
@@ -124,10 +118,10 @@ export const AuthPage = () => {
 
                     <div>
                         <div className="flex items-center justify-between mb-1.5 ml-1">
-                            <label className="block text-sm font-semibold text-[#1b1b23]">Mật khẩu</label>
+                            <label className="block text-sm font-semibold text-[#1b1b23]">Password</label>
                             {isLogin && (
-                                <Link to="/resetpass" className="text-xs font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-colors uppercase tracking-wider no-underline">
-                                    Quên?
+                                <Link to="/forgot-password" title='forgot password' className="text-xs font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-colors uppercase tracking-wider no-underline">
+                                    Forgot?
                                 </Link>
                             )}
                         </div>
@@ -149,10 +143,10 @@ export const AuthPage = () => {
                         {isSubmitting ? (
                             <>
                                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                Đang xử lý...
+                                Processing...
                             </>
                         ) : (
-                            isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản'
+                            isLogin ? 'Log In' : 'Sign Up'
                         )}
                     </button>
                 </form>
@@ -162,12 +156,16 @@ export const AuthPage = () => {
                         <span className="w-full border-t border-slate-100"></span>
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-slate-400 font-medium tracking-widest">Hoặc tiếp tục với</span>
+                        <span className="bg-white px-4 text-slate-400 font-medium tracking-widest">Or continue with</span>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <button className="flex items-center justify-center py-2.5 border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors">
+                    <button 
+                        type="button"
+                        onClick={() => handleSocialLogin('google')}
+                        className="flex items-center justify-center py-2.5 border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors"
+                    >
                         <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -176,7 +174,11 @@ export const AuthPage = () => {
                         </svg>
                         <span className="text-sm font-semibold text-[#1b1b23]">Google</span>
                     </button>
-                    <button className="flex items-center justify-center py-2.5 border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors">
+                    <button 
+                        type="button"
+                        onClick={() => handleSocialLogin('github')}
+                        className="flex items-center justify-center py-2.5 border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors"
+                    >
                         <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
                         </svg>
@@ -186,17 +188,16 @@ export const AuthPage = () => {
 
                 <div className="mt-10 text-center">
                     <p className="text-sm text-[#464554] font-medium">
-                        {isLogin ? "Chưa có tài khoản?" : "Đã có tài khoản?"}{' '}
+                        {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
                         <button 
                             onClick={() => setIsLogin(!isLogin)}
                             className="font-bold text-[#4648d4] hover:text-[#2f2ebe] transition-all underline-offset-4 hover:underline"
                         >
-                            {isLogin ? 'Tạo tài khoản mới' : 'Đăng nhập vào NexTask'}
+                            {isLogin ? 'Sign up' : 'Log in'}
                         </button>
                     </p>
                 </div>
             </div>
         </div>
-
     );
 };

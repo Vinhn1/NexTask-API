@@ -11,6 +11,7 @@ import { rateLimiter } from './middlewares/rateLimiter';
 import cors from 'cors';
 import helmet from 'helmet';
 import globalErrorHandler from './middlewares/errorMiddleware';
+import passport from './lib/passport';
 
 
 // Khởi tạo cấu hình biến môi trường 
@@ -31,6 +32,7 @@ app.use(cors());
 app.use(helmet());
 
 app.use(rateLimiter);
+app.use(passport.initialize());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/tasks', taskRoutes);
