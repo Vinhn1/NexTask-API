@@ -39,6 +39,25 @@ export class CommentController {
         );
     })
 
+    // Cập nhật comment
+    updateComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        // Lấy commentId từ params
+        const { commentId } = req.params;
+
+        // userId
+        const userId = req.user!.id;
+
+        // Gọi service
+        const updatedComment = await commentService.updateComment(commentId as string, userId, req.body);
+
+        // Trả về res
+        return ApiResponse.success(
+            res,
+            'Cập nhật bình luận thành công',
+            updatedComment
+        );
+    })
+
     // Xóa comment
     deleteComment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         // Lấy commentId từ params

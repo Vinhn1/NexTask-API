@@ -1,5 +1,5 @@
 import AppError from "../../utils/appError";
-import { CreateCommentDto } from "./comment.dto";
+import { CreateCommentDto, UpdateCommentDto } from "./comment.dto";
 import prisma from "../../lib/prisma";
 import { getIO } from "../../lib/io";
 
@@ -91,24 +91,82 @@ export class CommentService {
         return comments;
     }
 
-    // Xóa 1 comment
-    async deleteComment(commentId: string, userId: string){
-        // Kiểm tra comment có tồn tại không 
+    // Cập nhật comment
+    async updateComment(commentId: string, userId: string, data: UpdateCommentDto) {
+        // Tìm comment và lấy projectId kèm theo
         const comment = await prisma.comment.findUnique({
-            where: {
-                id: commentId
+            where: { id: commentId },
+            include: {
+                task: {
+                    select: { projectId: true }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                        avatar: true
+                    }
+                }
             }
         });
 
-        // Nếu comment tồn tại
-        if(!comment){
-            throw new AppError("Comment not found", 404);
+        if (!comment) {
+            throw new AppError("Bình luận không tồn tại", 404);
         }
 
-        // Kiểm tra quyền xóa
-        // Chỉ người tạo comment mới được xóa
+        // Kiểm tra quyền (chỉ người tạo mới được sửa)
+        if (comment.userId !== userId) {
+            throw new AppError("Bạn không có quyền chỉnh sửa bình luận này", 403);
+        }
+
+        // Cập nhật nội dung
+        const updatedComment = await prisma.comment.update({
+            where: { id: commentId },
+            data: { content: data.content },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullname: true,
+                        avatar: true
+                    }
+                }
+            }
+        });
+
+        // Real-time notification
+        const io = getIO();
+        io.to(`project:${comment.task.projectId}`).emit("comment:updated", {
+            action: "comment_updated",
+            taskId: comment.taskId,
+            comment: updatedComment
+        });
+
+        return updatedComment;
+    }
+
+    // Xóa 1 comment
+    async deleteComment(commentId: string, userId: string){
+        // Kiểm tra comment có tồn tại không và lấy projectId
+        const comment = await prisma.comment.findUnique({
+            where: {
+                id: commentId
+            },
+            include: {
+                task: {
+                    select: { projectId: true }
+                }
+            }
+        });
+
+        // Nếu không tồn tại
+        if(!comment){
+            throw new AppError("Bình luận không tồn tại", 404);
+        }
+
+        // Kiểm tra quyền xóa (chỉ người tạo mới được xóa - Có thể mở rộng cho Project Owner sau này)
         if(comment.userId !== userId){
-            throw new AppError('Bạn không có quyền xóa comment', 403);
+            throw new AppError('Bạn không có quyền xóa bình luận này', 403);
         }
 
         // Xóa comment
@@ -118,9 +176,17 @@ export class CommentService {
             }
         });
 
+        // Real-time notification
+        const io = getIO();
+        io.to(`project:${comment.task.projectId}`).emit("comment:deleted", {
+            action: "comment_deleted",
+            taskId: comment.taskId,
+            commentId: commentId
+        });
+
         // Trả kết quả
         return {
-            message: 'Comment đã được xóa thành công'
+            message: 'Bình luận đã được xóa thành công'
         }
     }
 }

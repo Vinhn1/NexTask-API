@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import commentService from '../../services/commentService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSocket } from '../../contexts/SocketContext';
 import taskService from '../../services/taskService';
 
 
@@ -11,6 +12,9 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const socket = useSocket();
   const commentsEndRef = useRef(null);
   const [showAssigneePicker, setShowAssigneePicker] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -69,6 +73,47 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
     }
   }, [task?.id]);
 
+  // Socket listener for comments
+  useEffect(() => {
+    if (!socket || !task?.id) return;
+
+    const handleNewComment = (data) => {
+      if (data.taskId === task.id) {
+        const newCommentObj = data.comment;
+        setComments(prev => {
+          // Check if comment already exists (to avoid duplicates if local state was updated)
+          if (prev.find(c => c.id === newCommentObj.id)) return prev;
+          return [newCommentObj, ...prev];
+        });
+        // Scroll to bottom
+        setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      }
+    };
+
+    const handleUpdatedComment = (data) => {
+      if (data.taskId === task.id) {
+        const updatedCommentObj = data.comment;
+        setComments(prev => prev.map(c => c.id === updatedCommentObj.id ? updatedCommentObj : c));
+      }
+    };
+
+    const handleDeletedComment = (data) => {
+      if (data.taskId === task.id) {
+        setComments(prev => prev.filter(c => c.id !== data.commentId));
+      }
+    };
+
+    socket.on('comment:new', handleNewComment);
+    socket.on('comment:updated', handleUpdatedComment);
+    socket.on('comment:deleted', handleDeletedComment);
+
+    return () => {
+      socket.off('comment:new', handleNewComment);
+      socket.off('comment:updated', handleUpdatedComment);
+      socket.off('comment:deleted', handleDeletedComment);
+    };
+  }, [socket, task?.id]);
+
   const fetchComments = async () => {
     setLoadingComments(true);
     try {
@@ -87,15 +132,33 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
 
     setPostingComment(true);
     try {
-      const res = await commentService.createComment(task.id, newComment);
-      // Backend will emit comment:new, but we can also update local state for better UX
-      // If socket is working, it will handle it. For now, let's just clear and wait for socket or refresh.
+      await commentService.createComment(task.id, newComment);
       setNewComment("");
-      // fetchComments(); // Uncomment if socket is not integrated in UI yet
     } catch (error) {
       console.error("Post comment error:", error);
     } finally {
       setPostingComment(false);
+    }
+  };
+
+  const handleUpdateComment = async (commentId) => {
+    if (!editContent.trim()) return;
+    try {
+      await commentService.updateComment(commentId, editContent);
+      setEditingCommentId(null);
+      setEditContent("");
+    } catch (error) {
+      console.error("Update comment error:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) {
+      try {
+        await commentService.deleteComment(commentId);
+      } catch (error) {
+        console.error("Delete comment error:", error);
+      }
     }
   };
 
@@ -321,18 +384,72 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
                     comments.map((comment, idx) => (
                       <div key={comment.id || idx} className="flex gap-5 group animate-fade-in">
                         <div className="w-11 h-11 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-700 font-black text-base flex-shrink-0 border-2 border-white shadow-md">
-                          {comment.user?.name?.charAt(0) || 'U'}
+                          {comment.user?.fullname?.charAt(0) || comment.user?.name?.charAt(0) || 'U'}
                         </div>
                         <div className="flex-1 space-y-2">
-                          <div className="flex items-center gap-3">
-                            <span className="font-black text-[#1b1b23] text-sm">{comment.user?.name || 'Thành viên'}</span>
-                            <span className="text-[10px] font-bold text-[#a1a0af] uppercase tracking-wider">
-                              {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="font-black text-[#1b1b23] text-sm">{comment.user?.fullname || comment.user?.name || 'Thành viên'}</span>
+                              <span className="text-[10px] font-bold text-[#a1a0af] uppercase tracking-wider">
+                                {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {comment.updatedAt !== comment.createdAt && " (đã chỉnh sửa)"}
+                              </span>
+                            </div>
+                            
+                            {/* Comment Actions (Edit/Delete) */}
+                            {comment.userId === user?.id && (
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                  onClick={() => {
+                                    setEditingCommentId(comment.id);
+                                    setEditContent(comment.content);
+                                  }}
+                                  className="w-8 h-8 flex items-center justify-center text-[#767586] hover:bg-white hover:text-[#4648d4] rounded-xl transition-all"
+                                >
+                                  <span className="material-symbols-rounded text-[18px]">edit</span>
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                  className="w-8 h-8 flex items-center justify-center text-[#767586] hover:bg-[#fff0f0] hover:text-[#93000a] rounded-xl transition-all"
+                                >
+                                  <span className="material-symbols-rounded text-[18px]">delete</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <div className="bg-[#f2f3ff] p-5 rounded-3xl rounded-tl-none text-[15px] text-[#1b1b23] font-medium leading-relaxed border border-[#e8eaff] shadow-sm">
-                            {comment.content}
-                          </div>
+
+                          {editingCommentId === comment.id ? (
+                            <div className="space-y-3">
+                              <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full bg-white border border-[#e4e1ed] rounded-2xl p-4 text-[15px] font-medium text-[#1b1b23] focus:border-[#4648d4] outline-none min-h-[100px] resize-none"
+                                autoFocus
+                              />
+                              <div className="flex items-center gap-2">
+                                <button 
+                                  onClick={() => handleUpdateComment(comment.id)}
+                                  className="px-4 py-2 bg-[#4648d4] text-white text-[12px] font-black rounded-xl hover:bg-[#3537c0] transition-all uppercase tracking-wider"
+                                >
+                                  Lưu thay đổi
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    setEditingCommentId(null);
+                                    setEditContent("");
+                                  }}
+                                  className="px-4 py-2 bg-[#f2f3ff] text-[#767586] text-[12px] font-black rounded-xl hover:bg-[#e4e1ed] transition-all uppercase tracking-wider"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-[#f2f3ff] p-5 rounded-3xl rounded-tl-none text-[15px] text-[#1b1b23] font-medium leading-relaxed border border-[#e8eaff] shadow-sm">
+                              {comment.content}
+                            </div>
+                          )}
+                          
                           <div className="flex items-center gap-5 pl-1">
                             <button className="text-[11px] font-black text-[#a1a0af] hover:text-[#4648d4] transition-colors uppercase tracking-widest">Thích</button>
                             <button className="text-[11px] font-black text-[#a1a0af] hover:text-[#4648d4] transition-colors uppercase tracking-widest">Trả lời</button>

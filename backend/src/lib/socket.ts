@@ -111,6 +111,50 @@ export const initSocket = (httpServer: any) => {
             }
         });
 
+
+        // Sự kiện join:task: khi user mở Task Detail
+        socket.on("join:task", async (taskId: string) => {
+            try{
+                // Kiểm tra quyền truy cập của user đối với Task
+                const task = await prisma.task.findFirst({
+                    where: {
+                        id: taskId,
+                        project: {
+                            OR: [
+                                {
+                                    ownerId: userId,
+                                },{
+                                    members: {
+                                        some: {
+                                            id: userId
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                });
+
+                // Nếu hợp lệ thì cho join
+                if(task){
+                    socket.join(`task:${taskId}`);
+                    console.log(`User ${userId} joined room task:${taskId}`);
+                }else{
+                    // có thể gửi một event lỗi về cho client nếu cần 
+                    socket.emit("error", "Bạn không có quyền truy cập task này");
+                }
+            }catch(err){
+                console.error("Lỗi khi join task room: ", err);
+            }
+        })
+
+
+        // Tạo sự kiện rời phòng khi đóng Task Detail
+        socket.on("leave:task", (taskId: string) => {
+            socket.leave(`task:${taskId}`);
+            console.log(`User ${userId} left room task:${taskId}`);
+        })
+
         // Xử lý khi ngắt kết nối
         socket.on("disconnect", () => {
             console.log(`User ${userId} disconnected`);
