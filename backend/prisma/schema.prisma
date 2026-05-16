@@ -14,7 +14,7 @@ datasource db {
 }
 
 // Định nghĩa Enum - Tập hợp các giá trị cố định 
-enum Role{
+enum Role {
   ADMIN
   MEMBER
 }
@@ -33,8 +33,11 @@ enum TaskPriority{
   URGENT
 }
 
-
-
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
 
 // Model User - "Bản vẽ" của bảng người dùng
 model User{
@@ -72,10 +75,13 @@ model User{
   memberProjects Project[]  @relation("ProjectMembers")
   comments Comment[]
   notifications Notification[]
+  sentInvitations     ProjectInvitation[] @relation("Inviter")
+  receivedInvitations ProjectInvitation[] @relation("Invitee")
 }
 
 
 // Model Project  là container chứa các Task.
+// Project context for team members.
 model Project{
   id  String @id @default(uuid())
   title String @map("title")
@@ -91,6 +97,24 @@ model Project{
 
   owner User @relation("ProjectOwner", fields: [ownerId], references: [id])
   members User[]  @relation("ProjectMembers")
+  invitations ProjectInvitation[]
+}
+
+
+model ProjectInvitation {
+  id        String           @id @default(uuid())
+  projectId String           @map("project_id")
+  inviterId String           @map("inviter_id")
+  inviteeId String           @map("invitee_id")
+  status    InvitationStatus @default(PENDING)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  inviter User    @relation("Inviter", fields: [inviterId], references: [id])
+  invitee User    @relation("Invitee", fields: [inviteeId], references: [id])
+
+  @@map("project_invitations")
 }
 
 
@@ -150,4 +174,3 @@ model Notification {
 
   @@map("notifications")
 }
-

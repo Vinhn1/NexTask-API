@@ -17,10 +17,11 @@ const sortTasksByPosition = (taskList) =>
     return (a.position ?? 0) - (b.position ?? 0);
   });
 
+import { useProject } from "../contexts/ProjectContext";
+
 export default function Tasks() {
   const { user } = useAuth();
-  const [projects, setProjects] = useState([]);
-  const [currentProject, setCurrentProject] = useState(null);
+  const { projects, currentProject, selectProject, refreshProjects, loading: projectsLoading } = useProject();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +53,6 @@ export default function Tasks() {
   useEffect(() => {
     if (!socket) return;
 
-    // Dùng named function để socket.off() xóa đúng listener, tránh duplicate
     const onTaskCreated = (data) => {
       const newTask = data.task;
       if (newTask.projectId === currentProject?.id) {
@@ -75,7 +75,6 @@ export default function Tasks() {
           return sortTasksByPosition(updated);
         });
 
-        // Cập nhật selectedTask nếu đang mở đúng task đó
         setSelectedTask(prev => prev?.id === taskFromSocket.id ? taskFromSocket : prev);
       }
     };
@@ -117,7 +116,6 @@ export default function Tasks() {
     socket.on("comment:deleted", onCommentDeleted);
     socket.on("task:comment_count_updated", onCommentCountUpdated);
 
-    // Cleanup: truyền đúng function reference để xóa đúng listener
     return () => {
       socket.off("task:created", onTaskCreated);
       socket.off("task:updated", onTaskUpdated);
@@ -126,13 +124,18 @@ export default function Tasks() {
       socket.off("comment:deleted", onCommentDeleted);
       socket.off("task:comment_count_updated", onCommentCountUpdated);
     };
-
   }, [socket, currentProject]);
 
+  const isOwner = currentProject && user && currentProject.ownerId === user.id;
 
-
-
-
+  // Sync currentProject with URL if requested
+  useEffect(() => {
+    if (requestedProjectId && projects.length > 0) {
+      if (currentProject?.id !== requestedProjectId) {
+        selectProject(requestedProjectId);
+      }
+    }
+  }, [requestedProjectId, projects, currentProject?.id, selectProject]);
 
   const fetchTasks = useCallback(async () => {
     if (!currentProject) return;
@@ -155,95 +158,38 @@ export default function Tasks() {
     }
   }, [currentProject, requestedProjectId, requestedTaskId]);
 
-  // Phân biệt Owner: Nếu người dùng hiện tại là người tạo dự án
-  const isOwner = currentProject && user && currentProject.ownerId === user.id;
-
-  const fetchProjects = useCallback(async () => {
-    try {
-      const res = await projectService.getUserProjects();
-      const projectList = res.data?.projects || [];
-      setProjects(projectList);
-      const projectFromLink = requestedProjectId
-        ? projectList.find(project => project.id === requestedProjectId)
-        : null;
-
-      if (projectList.length > 0) {
-        setCurrentProject(prevProject => {
-          if (projectFromLink) return projectFromLink;
-          if (!prevProject) return projectList[0];
-          return projectList.find(p => p.id === prevProject.id) || projectList[0];
-        });
-      } else {
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Fetch projects error:", error);
-      setLoading(false);
-    }
-  }, [requestedProjectId]);
-
   useEffect(() => {
-    if (!requestedProjectId || projects.length === 0) return;
-
-    const projectFromLink = projects.find(project => project.id === requestedProjectId);
-    if (projectFromLink && projectFromLink.id !== currentProject?.id) {
-      const timeoutId = window.setTimeout(() => {
-        setSelectedTask(null);
-        setCurrentProject(projectFromLink);
-      }, 0);
-      return () => window.clearTimeout(timeoutId);
-    }
-  }, [requestedProjectId, projects, currentProject?.id]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(fetchProjects, 0);
-    return () => window.clearTimeout(timeoutId);
-  }, [fetchProjects]);
-
-
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(fetchTasks, 0);
-    return () => window.clearTimeout(timeoutId);
+    fetchTasks();
   }, [fetchTasks]);
 
   const handleTaskCreated = (newTask) => {
-    if (currentProject && newTask.projectId === currentProject.id) {
-      //    setTasks(prev => [newTask, ...prev]);
-    }
+    setTasks(prev => sortTasksByPosition([...prev, newTask]));
+    setIsTaskFormOpen(false);
   };
 
   const handleProjectCreated = (newProject) => {
     setSearchParams({});
-    setProjects(prev => [...prev, newProject]);
-    setCurrentProject(newProject);
+    refreshProjects();
+    selectProject(newProject.id);
   };
 
   const handleSelectProject = (project) => {
     setSearchParams({});
     setSelectedTask(null);
-    setCurrentProject(project);
+    selectProject(project.id);
   };
 
-  const handleMemberAdded = (updatedProject) => {
-    // Cập nhật lại danh sách projects và currentProject với data mới nhất (có members mới)
-    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
-    setCurrentProject(updatedProject);
+  const handleMemberAdded = () => {
+    refreshProjects();
   };
-
 
   const handleTaskDeleted = (taskId) => {
-    // 1. Cập nhật danh sách task hiện tại (đuổi task bị xóa ra khỏi mảng)
     setTasks(prev => prev.filter(t => t.id !== taskId));
-
-    // 2. Đóng sidebar vì task đó không còn tồn tại nữa
     setSelectedTask(null);
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    // Cập nhật trong mảng tasks
     setTasks(prev => sortTasksByPosition(prev.map(t => t.id === updatedTask.id ? updatedTask : t)));
-    // Cập nhật selectedTask đang hiển thị
     setSelectedTask(updatedTask);
   };
 

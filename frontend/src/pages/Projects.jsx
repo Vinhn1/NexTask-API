@@ -1,37 +1,17 @@
-import { useState, useEffect } from "react";
+import { useProject } from "../contexts/ProjectContext";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
-import projectService from "../services/projectService";
 
 export default function Projects() {
-  const [projects, setProjects] = useState([]);
-  const [currentProject, setCurrentProject] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { projects, loading } = useProject();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await projectService.getUserProjects();
-        // Backend trả về: { status, result, data: { projects: [...] } }
-        const projectList = res.data?.projects || [];
-        setProjects(projectList);
-        if (projectList.length > 0) {
-          setCurrentProject(projectList[0]);
-        }
-      } catch (error) {
-        console.error("Fetch projects error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+  const handleProjectClick = (projectId) => {
+    navigate(`/dashboard?projectId=${projectId}`);
+  };
 
   return (
-    <DashboardLayout 
-      projects={projects} 
-      currentProject={currentProject} 
-      onSelectProject={setCurrentProject}
-    >
+    <DashboardLayout>
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-[28px] font-extrabold text-[#1b1b23] tracking-tight">Dự án của tôi</h2>
@@ -48,7 +28,11 @@ export default function Projects() {
           <div className="col-span-full py-20 text-center text-[#767586]">Đang tải dữ liệu...</div>
         ) : projects.length > 0 ? (
           projects.map((project) => (
-            <div key={project.id} className="bg-white p-6 rounded-3xl border border-[#e4e1ed] hover:border-[#4648d4] hover:shadow-xl hover:shadow-indigo-50/50 transition-all cursor-pointer group">
+            <div 
+              key={project.id} 
+              onClick={() => handleProjectClick(project.id)}
+              className="bg-white p-6 rounded-3xl border border-[#e4e1ed] hover:border-[#4648d4] hover:shadow-xl hover:shadow-indigo-50/50 transition-all cursor-pointer group"
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#e1e0ff] flex items-center justify-center text-[#4648d4]">
                   <span className="material-symbols-rounded text-[24px]">folder</span>

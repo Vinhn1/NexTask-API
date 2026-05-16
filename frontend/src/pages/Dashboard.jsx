@@ -10,36 +10,14 @@ import { useAuth } from "../contexts/AuthContext";
 import projectService from "../services/projectService";
 import taskService from "../services/taskService";
 
+import { useProject } from "../contexts/ProjectContext";
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const [projects, setProjects] = useState([]);
-  const [currentProject, setCurrentProject] = useState(null);
+  const { currentProject, loading: projectsLoading } = useProject();
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // 1. Lấy danh sách dự án khi load trang
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const res = await projectService.getUserProjects();
-        // Backend trả về: { status, result, data: { projects: [...] } }
-        const projectList = res.data?.projects || [];
-        setProjects(projectList);
-        
-        // Nếu có dự án, chọn dự án đầu tiên làm mặc định
-        if (projectList.length > 0) {
-          setCurrentProject(projectList[0]);
-        } else {
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Fetch projects error:", error);
-        setLoading(false);
-      }
-    };
-    fetchProjects();
-  }, []);
 
   // 2. Lấy task và stats khi currentProject thay đổi
   useEffect(() => {
@@ -77,7 +55,7 @@ export default function Dashboard() {
     }
   };
 
-  if (loading && projects.length === 0) {
+  if (projectsLoading && !currentProject) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#fcf8ff]">
         <div className="flex flex-col items-center gap-4">
@@ -90,9 +68,6 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout 
-      projects={projects} 
-      currentProject={currentProject} 
-      onSelectProject={setCurrentProject}
       taskCount={tasks.filter(t => t.status !== 'DONE').length}
     >
       <div className="mb-10">
