@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import taskService from "../services/taskService";
 import projectService from "../services/projectService";
@@ -9,6 +10,12 @@ import TaskForm from "../components/tasks/TaskForm.jsx";
 import ProjectForm from "../components/projects/ProjectForm.jsx";
 import ProjectMemberForm from "../components/projects/ProjectMemberForm.jsx";
 import { useSocket } from "../contexts/SocketContext.jsx";
+
+const sortTasksByPosition = (taskList) =>
+  [...taskList].sort((a, b) => {
+    if (a.status !== b.status) return 0;
+    return (a.position ?? 0) - (b.position ?? 0);
+  });
 
 export default function Tasks() {
   const { user } = useAuth();
@@ -23,6 +30,24 @@ export default function Tasks() {
   const [isProjectFormOpen, setIsProjectFormOpen] = useState(false);
   const [isMemberFormOpen, setIsMemberFormOpen] = useState(false);
   const socket = useSocket();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedProjectId = searchParams.get("projectId");
+  const requestedTaskId = searchParams.get("taskId");
+
+  useEffect(() => {
+    if (!socket || !currentProject?.id) return;
+
+    const joinCurrentProject = () => {
+      socket.emit("join:project", currentProject.id);
+    };
+
+    joinCurrentProject();
+    socket.on("connect", joinCurrentProject);
+
+    return () => {
+      socket.off("connect", joinCurrentProject);
+    };
+  }, [socket, currentProject?.id]);
 
   useEffect(() => {
     if (!socket) return;
@@ -34,7 +59,7 @@ export default function Tasks() {
         setTasks(prevTask => {
           const isExisted = prevTask.find(p => p.id === newTask.id);
           if (isExisted) return prevTask;
-          return [...prevTask, newTask].sort((a, b) => a.position - b.position);
+          return sortTasksByPosition([...prevTask, newTask]);
         });
       }
     };
@@ -43,8 +68,11 @@ export default function Tasks() {
       const taskFromSocket = data.updatedTask;
       if (taskFromSocket.projectId === currentProject?.id) {
         setTasks(prevTask => {
-          const updated = prevTask.map(t => t.id === taskFromSocket.id ? taskFromSocket : t);
-          return updated.sort((a, b) => a.position - b.position);
+          const taskExists = prevTask.some(t => t.id === taskFromSocket.id);
+          const updated = taskExists
+            ? prevTask.map(t => t.id === taskFromSocket.id ? taskFromSocket : t)
+            : [...prevTask, taskFromSocket];
+          return sortTasksByPosition(updated);
         });
 
         // Cập nhật selectedTask nếu đang mở đúng task đó
@@ -57,15 +85,46 @@ export default function Tasks() {
       setTasks(prevTask => prevTask.filter(t => t.id !== deletedTaskId));
     };
 
+    const updateTaskCommentCount = (taskId, getNextCount) => {
+      if (!taskId) return;
+      setTasks(prevTask => sortTasksByPosition(prevTask.map(t =>
+        t.id === taskId
+          ? { ...t, commentCount: getNextCount(t.commentCount ?? t.comments?.length ?? 0) }
+          : t
+      )));
+      setSelectedTask(prev => prev?.id === taskId
+        ? { ...prev, commentCount: getNextCount(prev.commentCount ?? prev.comments?.length ?? 0) }
+        : prev
+      );
+    };
+
+    const onCommentCreated = (data) => {
+      updateTaskCommentCount(data.taskId, count => count + 1);
+    };
+
+    const onCommentDeleted = (data) => {
+      updateTaskCommentCount(data.taskId, count => Math.max(count - 1, 0));
+    };
+
+    const onCommentCountUpdated = (data) => {
+      updateTaskCommentCount(data.taskId, count => Math.max(count + (data.increment || 0), 0));
+    };
+
     socket.on("task:created", onTaskCreated);
     socket.on("task:updated", onTaskUpdated);
     socket.on("task:deleted", onTaskDeleted);
+    socket.on("comment:new", onCommentCreated);
+    socket.on("comment:deleted", onCommentDeleted);
+    socket.on("task:comment_count_updated", onCommentCountUpdated);
 
     // Cleanup: truyền đúng function reference để xóa đúng listener
     return () => {
       socket.off("task:created", onTaskCreated);
       socket.off("task:updated", onTaskUpdated);
       socket.off("task:deleted", onTaskDeleted);
+      socket.off("comment:new", onCommentCreated);
+      socket.off("comment:deleted", onCommentDeleted);
+      socket.off("task:comment_count_updated", onCommentCountUpdated);
     };
 
   }, [socket, currentProject]);
@@ -75,33 +134,45 @@ export default function Tasks() {
 
 
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     if (!currentProject) return;
     setLoading(true);
     try {
       const res = await taskService.getProjectTasks(currentProject.id);
-      setTasks(res.data || []);
+      const nextTasks = sortTasksByPosition(res.data || []);
+      setTasks(nextTasks);
+
+      if (requestedTaskId && (!requestedProjectId || requestedProjectId === currentProject.id)) {
+        const taskFromLink = nextTasks.find(task => task.id === requestedTaskId);
+        if (taskFromLink) {
+          setSelectedTask(taskFromLink);
+        }
+      }
     } catch (error) {
       console.error("Fetch tasks error:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentProject, requestedProjectId, requestedTaskId]);
 
   // Phân biệt Owner: Nếu người dùng hiện tại là người tạo dự án
   const isOwner = currentProject && user && currentProject.ownerId === user.id;
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const res = await projectService.getUserProjects();
       const projectList = res.data?.projects || [];
       setProjects(projectList);
-      if (projectList.length > 0 && !currentProject) {
-        setCurrentProject(projectList[0]);
-      } else if (projectList.length > 0 && currentProject) {
-        // Cập nhật lại currentProject nếu nó đã tồn tại trong list mới
-        const updated = projectList.find(p => p.id === currentProject.id);
-        if (updated) setCurrentProject(updated);
+      const projectFromLink = requestedProjectId
+        ? projectList.find(project => project.id === requestedProjectId)
+        : null;
+
+      if (projectList.length > 0) {
+        setCurrentProject(prevProject => {
+          if (projectFromLink) return projectFromLink;
+          if (!prevProject) return projectList[0];
+          return projectList.find(p => p.id === prevProject.id) || projectList[0];
+        });
       } else {
         setLoading(false);
       }
@@ -109,17 +180,32 @@ export default function Tasks() {
       console.error("Fetch projects error:", error);
       setLoading(false);
     }
-  };
+  }, [requestedProjectId]);
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (!requestedProjectId || projects.length === 0) return;
+
+    const projectFromLink = projects.find(project => project.id === requestedProjectId);
+    if (projectFromLink && projectFromLink.id !== currentProject?.id) {
+      const timeoutId = window.setTimeout(() => {
+        setSelectedTask(null);
+        setCurrentProject(projectFromLink);
+      }, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [requestedProjectId, projects, currentProject?.id]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(fetchProjects, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [fetchProjects]);
 
 
 
   useEffect(() => {
-    fetchTasks();
-  }, [currentProject]);
+    const timeoutId = window.setTimeout(fetchTasks, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [fetchTasks]);
 
   const handleTaskCreated = (newTask) => {
     if (currentProject && newTask.projectId === currentProject.id) {
@@ -128,8 +214,15 @@ export default function Tasks() {
   };
 
   const handleProjectCreated = (newProject) => {
+    setSearchParams({});
     setProjects(prev => [...prev, newProject]);
     setCurrentProject(newProject);
+  };
+
+  const handleSelectProject = (project) => {
+    setSearchParams({});
+    setSelectedTask(null);
+    setCurrentProject(project);
   };
 
   const handleMemberAdded = (updatedProject) => {
@@ -149,7 +242,7 @@ export default function Tasks() {
 
   const handleTaskUpdate = (updatedTask) => {
     // Cập nhật trong mảng tasks
-    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t));
+    setTasks(prev => sortTasksByPosition(prev.map(t => t.id === updatedTask.id ? updatedTask : t)));
     // Cập nhật selectedTask đang hiển thị
     setSelectedTask(updatedTask);
   };
@@ -161,9 +254,12 @@ export default function Tasks() {
     if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
       return;
     }
+    const draggedTask = tasks.find(t => t.id === draggableId);
+    if (!draggedTask) return;
+
     // 2. Tìm danh sách task của cột đích và sắp xếp chúng theo thứ tự position
     const destColumnTasks = tasks
-      .filter(t => t.status === destination.droppableId)
+      .filter(t => t.status === destination.droppableId && t.id !== draggableId)
       .sort((a, b) => a.position - b.position);
     let newPosition;
     // 3. CHIẾN THUẬT LEXORANK: Tính toán vị trí mới
@@ -189,7 +285,7 @@ export default function Tasks() {
         : t
     );
     // Cần sort lại state để UI hiển thị đúng thứ tự mới sau khi cập nhật position
-    setTasks(updatedTasks.sort((a, b) => a.position - b.position));
+    setTasks(sortTasksByPosition(updatedTasks));
     // 5. Gửi lệnh cập nhật lên Server
     try {
       await taskService.updateTask(draggableId, {
@@ -204,6 +300,7 @@ export default function Tasks() {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleCreateMockData = async () => {
     setLoading(true);
     try {
@@ -254,7 +351,7 @@ export default function Tasks() {
     <DashboardLayout
       projects={projects}
       currentProject={currentProject}
-      onSelectProject={setCurrentProject}
+      onSelectProject={handleSelectProject}
       onNewTaskClick={() => isOwner && setIsTaskFormOpen(true)}
       onNewProjectClick={() => setIsProjectFormOpen(true)}
       isOwner={isOwner}
@@ -405,4 +502,3 @@ export default function Tasks() {
     </DashboardLayout>
   );
 }
-

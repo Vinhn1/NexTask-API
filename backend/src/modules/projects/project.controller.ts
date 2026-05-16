@@ -95,7 +95,7 @@ export class ProjectController {
 
     async addMember(req: Request, res: Response, next: NextFunction) {
         try {
-            const { projectId } = req.params;
+            const projectId = req.params.projectId as string;
             const { email } = req.body;
             const ownerId = req.user!.id;
 
@@ -112,7 +112,7 @@ export class ProjectController {
 
     async getMembers(req: Request, res: Response, next: NextFunction) {
         try {
-            const { projectId } = req.params;
+            const projectId = req.params.projectId as string;
             const userId = req.user!.id;
 
             const members = await projectService.getProjectMembers(projectId, userId);

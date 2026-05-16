@@ -2,6 +2,31 @@ import prisma from "../../lib/prisma";
 import AppError from "../../utils/appError";
 import { CreateTaskDto, UpdateTaskDto } from "./task.dto";
 import { getIO } from "../../lib/io";
+import { NotificationService } from "../notifications/notification.service";
+
+const taskRelations = {
+    assignee: {
+        select: {
+            id: true,
+            fullname: true,
+            email: true,
+            avatar: true
+        }
+    },
+    _count: {
+        select: {
+            comments: true
+        }
+    }
+};
+
+const serializeTask = (task: any) => {
+    const { _count, ...rest } = task;
+    return {
+        ...rest,
+        commentCount: _count?.comments ?? 0
+    };
+};
 
 export class TaskService {
     // Tạo mới Task 
@@ -22,6 +47,13 @@ export class TaskService {
                     // Hoặc là thành viên
                     { members: {some: { id: userId}}}
                 ]
+            },
+            include: {
+                members: {
+                    select: {
+                        id: true
+                    }
+                }
             }
         });
 
@@ -60,30 +92,52 @@ export class TaskService {
                 },
                 ...(assigneeId && assigneeId.trim() !== "" ? { assignee: { connect: { id: assigneeId } } } : {}),
                 position: newPosition
-            }
+            },
+            include: taskRelations
         });
+        const serializedTask = serializeTask(newTask);
 
         // --- REAL-TIME (SOCKET.IO) ---
         const io = getIO();
         
         // 1. Thông báo cho cả dự án có Task mới
-        io.to(`project:${newTask.projectId}`).emit("task:created", {
+        io.to(`project:${serializedTask.projectId}`).emit("task:created", {
             action: "task_created",
-            taskId: newTask.id,
-            task: newTask
+            taskId: serializedTask.id,
+            task: serializedTask
         });
 
         // 2. Nếu có gán người thực hiện, gửi thông báo riêng cho họ
-        if (newTask.assigneeId) {
-            io.to(`user:${newTask.assigneeId}`).emit("notification", {
+        if (serializedTask.assigneeId) {
+            await NotificationService.createNotification({
+                userId: serializedTask.assigneeId,
                 type: "TASK_ASSIGNED",
-                message: `Bạn đã được gán một công việc mới: "${newTask.title}"`,
-                taskId: newTask.id,
-                task: newTask
+                title: "Được giao công việc mới",
+                content: `Bạn đã được giao công việc mới: "${serializedTask.title}"`,
+                link: `/tasks?projectId=${serializedTask.projectId}&taskId=${serializedTask.id}`
             });
         }
 
-        return newTask;
+        const notificationRecipients = new Set<string>([
+            project.ownerId,
+            ...project.members.map(member => member.id)
+        ]);
+        notificationRecipients.delete(userId);
+        if (serializedTask.assigneeId) {
+            notificationRecipients.delete(serializedTask.assigneeId);
+        }
+
+        await Promise.all([...notificationRecipients].map(recipientId =>
+            NotificationService.createNotification({
+                userId: recipientId,
+                type: "TASK_CREATED",
+                title: "Task mới trong dự án",
+                content: `Task "${serializedTask.title}" vừa được tạo`,
+                link: `/tasks?projectId=${serializedTask.projectId}&taskId=${serializedTask.id}`
+            })
+        ));
+
+        return serializedTask;
     }
 
     // GetALL Task 
@@ -129,7 +183,8 @@ export class TaskService {
                 take: take,
                 orderBy: {
                     position: 'asc'
-                }
+                },
+                include: taskRelations
             }),
             prisma.task.count ({
                 where: whereCondition
@@ -138,7 +193,7 @@ export class TaskService {
 
         // Trả về kết quả kèm metadata
         return {
-            tasks,
+            tasks: tasks.map(serializeTask),
             pagination: {
                 total,
                 page,
@@ -199,16 +254,10 @@ export class TaskService {
                 }),
             },
             include: {
-                assignee: {
-                    select: {
-                        id: true,
-                        fullname: true,
-                        email: true,
-                        avatar: true
-                    }
-                }
+                ...taskRelations
             }
         });
+        const serializedTask = serializeTask(updatedTask);
 
 
 
@@ -229,25 +278,26 @@ export class TaskService {
         }
 
         // 1. Gửi sự kiện cập nhật đến toàn bộ thành viên trong dự án
-        io.to(`project:${updatedTask.projectId}`).emit("task:updated", {
+        io.to(`project:${serializedTask.projectId}`).emit("task:updated", {
             action,
-            taskId: updatedTask.id,
-            newStatus: updatedTask.status,
-            updatedTask,
+            taskId: serializedTask.id,
+            newStatus: serializedTask.status,
+            updatedTask: serializedTask,
         });
 
         // 2. Gửi thông báo riêng cho người được gán (Assignee) nếu có thay đổi người gán
-        if (updateAssigneeId && updatedTask.assigneeId) {
-            io.to(`user:${updatedTask.assigneeId}`).emit("notification", {
+        if (updateAssigneeId && serializedTask.assigneeId && serializedTask.assigneeId !== task.assigneeId) {
+            await NotificationService.createNotification({
+                userId: serializedTask.assigneeId,
                 type: "TASK_ASSIGNED",
-                message: `Bạn đã được gán công việc: "${updatedTask.title}"`,
-                taskId: updatedTask.id,
-                updatedTask
+                title: "Được giao công việc",
+                content: `Bạn đã được giao công việc: "${serializedTask.title}"`,
+                link: `/tasks?projectId=${serializedTask.projectId}&taskId=${serializedTask.id}`
             });
         }
         // --- KẾT THÚC LOGIC REAL-TIME ---
 
-        return updatedTask;
+        return serializedTask;
     }
 
     // Delete

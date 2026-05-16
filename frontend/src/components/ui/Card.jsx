@@ -1,5 +1,3 @@
-import { C } from "@/constants/brand";
-
 export function Card({ children, className = "", ...props }) {
   return (
     <div className={`bg-white rounded-[20px] border border-border ${className}`} {...props}>
@@ -14,4 +12,4 @@ export function SectionLabel({ children, className = "", ...props }) {
       {children}
     </span>
   );
-}
+}

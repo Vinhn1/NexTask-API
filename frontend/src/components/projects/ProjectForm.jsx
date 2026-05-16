@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Layout, AlignLeft, Target } from 'lucide-react';
 import projectService from '../../services/projectService';
 import { toast } from 'react-hot-toast';

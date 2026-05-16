@@ -22,6 +22,7 @@ enum Role{
 enum TaskStatus{
   TODO
   IN_PROGRESS
+  REVIEW
   DONE
 }
 
@@ -51,6 +52,13 @@ model User{
   // Quản lý trạng thái
   emailVerifiedAt DateTime? @map("email_verified_at")
   refreshTokenVersion Int @default(1) @map("refresh_token_version")
+  
+  // Thông tin mở rộng
+  githubId String? @unique @map("github_id")
+  bio      String? @db.Text
+  jobTitle String? @map("job_title")
+  department String?
+  
   // Thời gian hệ thống
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -63,6 +71,7 @@ model User{
   ownedProjects Project[] @relation("ProjectOwner")
   memberProjects Project[]  @relation("ProjectMembers")
   comments Comment[]
+  notifications Notification[]
 }
 
 
@@ -124,5 +133,21 @@ model Comment {
   task Task @relation(fields: [taskId], references: [id])
 
   @@map("comments")
+}
+
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // e.g., "TASK_ASSIGNED", "COMMENT_ADDED", "PROJECT_INVITATION"
+  title     String
+  content   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  link      String?  // Optional link to redirect user (e.g., /tasks/123)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
 

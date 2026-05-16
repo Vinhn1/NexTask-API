@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 
@@ -11,11 +11,17 @@ export const AuthPage = () => {
 
 
     const [isLogin, setIsLogin] = useState(mode !== 'signup');
+    const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     // Đồng bộ state khi URL thay đổi
     useEffect(() => {
-        setIsLogin(mode !== 'signup');
-        setError(''); // Xóa lỗi khi chuyển mode
+        const timeoutId = window.setTimeout(() => {
+            setIsLogin(mode !== 'signup');
+            setError('');
+        }, 0);
+
+        return () => window.clearTimeout(timeoutId);
     }, [mode]);
 
     // Các state để quản lý form
@@ -24,9 +30,6 @@ export const AuthPage = () => {
     const [name, setName] = useState('');
     
     // State để quản lý lỗi và trạng thái gửi form
-    const [error, setError] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
     const { login, register, user, loading } = useAuth();
 
     // Nếu đã đăng nhập rồi thì không cho ở lại trang Auth nữa, đá sang Dashboard

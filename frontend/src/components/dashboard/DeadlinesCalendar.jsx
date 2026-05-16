@@ -1,9 +1,7 @@
-import { useState } from "react";
-
 const calDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 export default function DeadlinesCalendar({ tasks = [] }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const currentDate = new Date();
 
   // Lấy thông tin tháng hiện tại
   const month = currentDate.getMonth();

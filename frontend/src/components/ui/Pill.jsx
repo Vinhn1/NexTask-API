@@ -1,5 +1,3 @@
-import { C } from "@/constants/brand";
-
 const variantClasses = {
   indigo: "bg-[#eef0fd] text-primary border border-[#c7c9f5]",
   amber:  "bg-[#fef3e2] text-[#b45309] border border-[#fcd38d]",

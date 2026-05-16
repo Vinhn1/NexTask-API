@@ -1,5 +1,3 @@
-import { C } from "@/constants/brand";
-
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import { Stats } from "./Stats";

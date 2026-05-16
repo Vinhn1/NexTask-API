@@ -1,5 +1,4 @@
 import { Zap, Bot, LineChart, ShieldCheck, ArrowRight, Kanban } from "lucide-react";
-import { C } from "@/constants/brand";
 import { Card, SectionLabel } from "@/components/ui/Card";
 import { FeatureCard } from "@/components/landing/LandingParts";
 
@@ -80,4 +79,4 @@ export default function Features() {
       </div>
     </section>
   );
-}
+}

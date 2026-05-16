@@ -1,13 +1,10 @@
-import React from 'react';
 import TaskCard from './TaskCard';
 import { Droppable } from "@hello-pangea/dnd";
 
 export default function TaskColumn({ title, status, tasks, onTaskClick, selectedTaskId }) {
   return (
     <div className="flex-shrink-0 w-[320px] bg-[#fcf8ff] flex flex-col h-full rounded-2xl">
-
       <div className="flex items-center justify-between mb-4 px-2 py-1 relative">
-        {/* Empty div for spacing balance */}
         <div className="w-8"></div>
         <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 flex items-center gap-2">
           <h3 className="text-[15px] font-bold text-[#1b1b23]">{title}</h3>
@@ -27,21 +24,17 @@ export default function TaskColumn({ title, status, tasks, onTaskClick, selected
             ref={provided.innerRef}
             {...provided.droppableProps}
           >
-
             {tasks.map((task, index) => (
               <TaskCard
                 key={task.id}
                 task={task}
-                index={index} // 4. Truyền index xuống cho con
+                index={index}
                 onClick={onTaskClick}
                 isSelected={selectedTaskId === task.id}
               />
             ))}
 
             {provided.placeholder}
-
-
-
           </div>
         )}
       </Droppable>

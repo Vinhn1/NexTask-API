@@ -64,6 +64,26 @@ export default function Analytics() {
         </div>
       </div>
 
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-4 gap-4">
+        {loading ? (
+          <div className="sm:col-span-4 bg-white border border-[#e4e1ed] rounded-2xl px-5 py-4 text-sm font-bold text-[#767586]">
+            Đang tải thống kê...
+          </div>
+        ) : (
+          [
+            ['Tổng nhiệm vụ', stats?.total ?? 0],
+            ['Cần làm', stats?.todo ?? 0],
+            ['Đang làm', stats?.inProgress ?? 0],
+            ['Hoàn thành', stats?.done ?? 0],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-white border border-[#e4e1ed] rounded-2xl px-5 py-4">
+              <div className="text-xs font-bold text-[#767586] uppercase tracking-wider">{label}</div>
+              <div className="text-2xl font-black text-[#1b1b23] mt-1">{value}</div>
+            </div>
+          ))
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Productivity Chart Placeholder */}
         <div className="bg-white p-8 rounded-3xl border border-[#e4e1ed] shadow-sm">

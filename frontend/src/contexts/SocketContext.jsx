@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from 'socket.io-client';
 import { useAuth } from "./AuthContext";
@@ -15,11 +16,17 @@ export const SocketProvider = ({ children }) => {
             const token = localStorage.getItem('accessToken');
             
             // Khởi tạo kết nối 
-            const newSocket = io('http://localhost:3000', {
+            const socketUrl =
+                import.meta.env.VITE_SOCKET_URL ||
+                import.meta.env.VITE_API_TARGET ||
+                window.location.origin;
+            const newSocket = io(socketUrl, {
                 auth: {
                     token
                 },
-                transports: ['websocket'] // Force websocket for better performance if server supports it
+                // Để Socket.IO tự negotiate: polling trước, rồi upgrade lên websocket
+                // Tránh lỗi kết nối khi Vite proxy chưa sẵn sàng
+                transports: ['polling', 'websocket'],
             });
 
             newSocket.on('connect', () => {
@@ -30,15 +37,17 @@ export const SocketProvider = ({ children }) => {
                 console.error('❌ Socket connection error:', error.message);
             });
 
-            setSocket(newSocket);
+            const timeoutId = window.setTimeout(() => setSocket(newSocket), 0);
 
             return () => {
+                window.clearTimeout(timeoutId);
                 console.log('🔌 Disconnecting socket...');
                 newSocket.disconnect();
             };
         } else {
             // Nếu không có user (đăng xuất), đảm bảo socket bị ngắt và reset state
-            setSocket(null);
+            const timeoutId = window.setTimeout(() => setSocket(null), 0);
+            return () => window.clearTimeout(timeoutId);
         }
     }, [user]);
 

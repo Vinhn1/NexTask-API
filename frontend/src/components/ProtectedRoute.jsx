@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 // CÁNH CỔNG KIỂM SOÁT
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute() {
 
     // Lấy thông tin user và trạng thái login từ kho chung AuthContext
     const { user, loading } = useAuth();

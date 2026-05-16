@@ -1,5 +1,4 @@
 import { Rocket, Play, Bell, Check } from "lucide-react";
-import { C } from "@/constants/brand";
 import Pill from "@/components/ui/Pill";
 import { BtnPrimary, BtnGhost } from "@/components/ui/Button";
 import DashboardMockup from "@/components/landing/DashboardMockup";
@@ -66,4 +65,4 @@ export default function Hero() {
       </div>
     </section>
   );
-}
+}

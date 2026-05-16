@@ -35,6 +35,7 @@ const taskService = {
       total: tasks.length,
       done: tasks.filter(t => t.status === 'DONE').length,
       inProgress: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+      review: tasks.filter(t => t.status === 'REVIEW').length,
       todo: tasks.filter(t => t.status === 'TODO').length,
     };
   }

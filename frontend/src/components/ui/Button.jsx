@@ -1,5 +1,3 @@
-import { C } from "@/constants/brand";
-
 export function BtnPrimary({ children, className = "", href = "#", ...props }) {
   return (
     <a
@@ -22,4 +20,4 @@ export function BtnGhost({ children, className = "", href = "#", ...props }) {
       {children}
     </a>
   );
-}
+}

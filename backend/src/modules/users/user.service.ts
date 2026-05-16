@@ -2,6 +2,35 @@ import prisma from "../../lib/prisma";
 import AppError  from '../../utils/appError';
 
 export class UserService {
+    private readonly publicUserSelect = {
+        id: true,
+        email: true,
+        fullname: true,
+        avatar: true,
+        role: true,
+        bio: true,
+        jobTitle: true,
+        department: true,
+        createdAt: true,
+    } as const;
+
+    async updateProfile(userId: string, data: {
+        fullname?: string;
+        bio?: string | null;
+        jobTitle?: string | null;
+        department?: string | null;
+    }){
+        await this.getUserById(userId);
+
+        return await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data,
+            select: this.publicUserSelect
+        });
+    }
+
     async updateAvatar(userId: string, avatarPath: string){
         // Kiểm tra xem User có tồn tại trong DB không
         const user = await prisma.user.findUnique({
@@ -23,13 +52,7 @@ export class UserService {
                 avatar: avatarPath
             },
             // Chỉ trả về những thông tin cần thiết, không trả về mật khẩu
-            select: {
-                id: true,
-                email: true,
-                fullname: true,
-                avatar: true,
-                role: true
-            }
+            select: this.publicUserSelect
         });
     }
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import taskService from "../../services/taskService";
+import { TASK_STATUSES } from "../../constants/taskStatus";
 
 export default function TaskForm({ isOpen, onClose, projectId, onTaskCreated, projectMembers = [] }) {
   const [loading, setLoading] = useState(false);
@@ -167,18 +168,18 @@ export default function TaskForm({ isOpen, onClose, projectId, onTaskCreated, pr
             <div>
               <label className="block text-xs font-bold text-[#767586] uppercase tracking-wider mb-2 ml-1">Trạng thái ban đầu</label>
               <div className="flex flex-wrap gap-2">
-                {['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'].map((s) => (
+                {TASK_STATUSES.map((status) => (
                   <button
-                    key={s}
+                    key={status.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, status: s })}
+                    onClick={() => setFormData({ ...formData, status: status.id })}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                      formData.status === s 
+                      formData.status === status.id 
                         ? "bg-[#4648d4] border-[#4648d4] text-white shadow-md shadow-indigo-100" 
                         : "bg-white border-[#e4e1ed] text-[#767586] hover:bg-[#fcf8ff]"
                     }`}
                   >
-                    {s.replace('_', ' ')}
+                    {status.label}
                   </button>
                 ))}
               </div>

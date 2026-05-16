@@ -7,7 +7,7 @@ const api = axios.create({
   },
 });
 
-// Thêm interceptor để tự động chèn token vào mỗi request
+// Tự động chèn token vào mỗi request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -16,20 +16,24 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Thêm interceptor để xử lý lỗi tập trung (ví dụ: token hết hạn)
+// Xử lý lỗi tập trung
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Logout hoặc xử lý refresh token ở đây nếu cần
-      localStorage.removeItem('accessToken');
-      window.location.href = '/auth';
+    // Bỏ qua lỗi mạng (backend offline) - không logout
+    if (!error.response) {
+      return Promise.reject(error);
     }
+
+    if (error.response.status === 401) {
+      // Chỉ bắn event, KHÔNG tự clear token ở đây
+      // AuthContext sẽ gọi logout() để clear token và navigate về /auth
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+    }
+
     return Promise.reject(error);
   }
 );

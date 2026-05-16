@@ -1,4 +1,10 @@
 packages:
-- 'backend'
-- 'frontend'
-- 'shared' # Dùng để chia sẻ code giữa 2 bên 
+  - 'backend'
+  - 'frontend'
+  - 'shared' # Dùng để chia sẻ code giữa 2 bên 
+allowBuilds:
+  '@prisma/engines': true
+  bcrypt: true
+  esbuild: true
+  prisma: true
+  unrs-resolver: true

@@ -1,4 +1,3 @@
-import { Check, Bell, Layout } from "lucide-react";
 import { C } from "@/constants/brand";
 import Pill from "@/components/ui/Pill";
 import KanbanCol from "./KanbanCol";
@@ -101,4 +100,3 @@ export default function DashboardMockup() {
     </div>
   );
 }
-

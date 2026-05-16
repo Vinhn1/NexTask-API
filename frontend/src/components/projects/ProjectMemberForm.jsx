@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import projectService from "../../services/projectService";
 import { toast } from "react-hot-toast";
 
@@ -8,13 +8,7 @@ export default function ProjectMemberForm({ isOpen, onClose, projectId, onMember
   const [members, setMembers] = useState([]);
   const [fetchLoading, setFetchLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && projectId) {
-      fetchMembers();
-    }
-  }, [isOpen, projectId]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     setFetchLoading(true);
     try {
       const res = await projectService.getMembers(projectId);
@@ -24,7 +18,14 @@ export default function ProjectMemberForm({ isOpen, onClose, projectId, onMember
     } finally {
       setFetchLoading(false);
     }
-  };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (isOpen && projectId) {
+      const timeoutId = window.setTimeout(fetchMembers, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [isOpen, projectId, fetchMembers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

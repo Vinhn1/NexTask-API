@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { C } from "@/constants/brand";
 import { Card, SectionLabel } from "@/components/ui/Card";
 import Pill from "@/components/ui/Pill";
 import { PricingTier } from "@/components/landing/LandingParts";

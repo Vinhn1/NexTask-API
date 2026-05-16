@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { C } from "@/constants/brand";
 import { BtnPrimary } from "@/components/ui/Button";
 
 const NAV_LINKS = ["Tính năng", "Bảng giá", "Tài liệu", "Blog"];
@@ -40,4 +39,4 @@ export default function Navbar() {
     </nav>
   );
 }
-
+

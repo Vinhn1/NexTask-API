@@ -6,6 +6,13 @@ import { deleteFile } from '../../utils/file.util';
 import { ApiResponse } from '../../utils/apiResponse';
 
 export class UserController {
+    updateProfile = catchAsync(async (req: Request, res: Response) => {
+        const userId = req.user!.id;
+        const user = await userService.updateProfile(userId, req.body);
+
+        return ApiResponse.success(res, 'Cap nhat ho so thanh cong', user);
+    });
+
     updateAvatar = catchAsync(async (req: Request, res: Response) => {
         // Kiểm tra nếu không có file (req.file undefined) thì báo lỗi 400
         if(!req.file){

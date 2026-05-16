@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import commentService from '../../services/commentService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import taskService from '../../services/taskService';
+import { getTaskStatus } from '../../constants/taskStatus';
 
+const sortCommentsByCreatedAt = (commentList) =>
+  [...commentList].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
 export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete, onTaskUpdate }) {
   const { user } = useAuth();
@@ -16,6 +19,7 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   const [editContent, setEditContent] = useState("");
   const socket = useSocket();
   const commentsEndRef = useRef(null);
+  const taskId = task?.id;
   const [showAssigneePicker, setShowAssigneePicker] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const assigneePickerRef = useRef(null);
@@ -67,11 +71,48 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   };
 
 
-  useEffect(() => {
-    if (task?.id) {
-      fetchComments();
+  const fetchComments = useCallback(async () => {
+    if (!taskId) return;
+
+    setLoadingComments(true);
+    try {
+      const res = await commentService.getTaskComments(taskId);
+      setComments(sortCommentsByCreatedAt(res.data || []));
+    } catch (error) {
+      console.error("Fetch comments error:", error);
+    } finally {
+      setLoadingComments(false);
     }
-  }, [task?.id]);
+  }, [taskId]);
+
+  useEffect(() => {
+    if (taskId) {
+      const timeoutId = window.setTimeout(fetchComments, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [taskId, fetchComments]);
+
+  useEffect(() => {
+    if (!loadingComments) {
+      commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [comments.length, loadingComments]);
+
+  useEffect(() => {
+    if (!socket || !taskId) return;
+
+    const joinTaskRoom = () => {
+      socket.emit('join:task', taskId);
+    };
+
+    joinTaskRoom();
+    socket.on('connect', joinTaskRoom);
+
+    return () => {
+      socket.off('connect', joinTaskRoom);
+      socket.emit('leave:task', taskId);
+    };
+  }, [socket, taskId]);
 
   // Socket listener for comments
   useEffect(() => {
@@ -83,7 +124,7 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
         setComments(prev => {
           // Check if comment already exists (to avoid duplicates if local state was updated)
           if (prev.find(c => c.id === newCommentObj.id)) return prev;
-          return [newCommentObj, ...prev];
+          return sortCommentsByCreatedAt([...prev, newCommentObj]);
         });
         // Scroll to bottom
         setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -114,28 +155,42 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
     };
   }, [socket, task?.id]);
 
-  const fetchComments = async () => {
-    setLoadingComments(true);
-    try {
-      const res = await commentService.getTaskComments(task.id);
-      setComments(res.data || []);
-    } catch (error) {
-      console.error("Fetch comments error:", error);
-    } finally {
-      setLoadingComments(false);
-    }
-  };
-
   const handlePostComment = async (e) => {
     if (e) e.preventDefault();
     if (!newComment.trim() || postingComment) return;
 
     setPostingComment(true);
+    const tempComment = {
+      id: `temp-${Date.now()}`,
+      content: newComment.trim(),
+      taskId: task.id,
+      userId: user?.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      user: {
+        id: user?.id,
+        fullname: user?.fullname || user?.name,
+        avatar: user?.avatar,
+      },
+      isOptimistic: true,
+    };
+    setComments(prev => sortCommentsByCreatedAt([...prev, tempComment]));
+    setNewComment("");
+
     try {
-      await commentService.createComment(task.id, newComment);
-      setNewComment("");
+      const res = await commentService.createComment(task.id, tempComment.content);
+      const createdComment = res.data;
+      if (createdComment) {
+        setComments(prev => {
+          const withoutTemp = prev.filter(c => c.id !== tempComment.id);
+          if (withoutTemp.find(c => c.id === createdComment.id)) return sortCommentsByCreatedAt(withoutTemp);
+          return sortCommentsByCreatedAt([...withoutTemp, createdComment]);
+        });
+      }
     } catch (error) {
       console.error("Post comment error:", error);
+      setComments(prev => prev.filter(c => c.id !== tempComment.id));
+      setNewComment(tempComment.content);
     } finally {
       setPostingComment(false);
     }
@@ -144,7 +199,11 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   const handleUpdateComment = async (commentId) => {
     if (!editContent.trim()) return;
     try {
-      await commentService.updateComment(commentId, editContent);
+      const res = await commentService.updateComment(commentId, editContent);
+      const updatedComment = res.data;
+      if (updatedComment) {
+        setComments(prev => prev.map(c => c.id === updatedComment.id ? updatedComment : c));
+      }
       setEditingCommentId(null);
       setEditContent("");
     } catch (error) {
@@ -156,6 +215,7 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
     if (window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) {
       try {
         await commentService.deleteComment(commentId);
+        setComments(prev => prev.filter(c => c.id !== commentId));
       } catch (error) {
         console.error("Delete comment error:", error);
       }
@@ -163,6 +223,7 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   };
 
   if (!task) return null;
+  const status = getTaskStatus(task.status);
 
   const tabs = [
     { id: 'activity', label: 'Hoạt động', icon: 'history' },
@@ -316,13 +377,13 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
               <div className="flex justify-between items-center mb-5 relative z-10">
                 <span className="text-[15px] font-black text-[#1b1b23]">Tiến độ công việc</span>
                 <span className="text-[16px] font-black text-[#4648d4]">
-                  {task.status === 'DONE' ? '100%' : task.status === 'IN_PROGRESS' ? '65%' : '0%'}
+                  {status.progress}%
                 </span>
               </div>
               <div className="h-4 w-full bg-[#f2effb] rounded-full overflow-hidden relative z-10">
                 <div
                   className="h-full bg-gradient-to-r from-[#4648d4] via-[#6063ee] to-[#57dffe] rounded-full transition-all duration-700 ease-out"
-                  style={{ width: task.status === 'DONE' ? '100%' : task.status === 'IN_PROGRESS' ? '65%' : '0%' }}
+                  style={{ width: `${status.progress}%` }}
                 >
                   <div className="w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                 </div>

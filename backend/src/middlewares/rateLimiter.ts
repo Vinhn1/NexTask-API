@@ -1,12 +1,15 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 // Middleware giới hạn số request từ client
 export const rateLimiter = rateLimit({
     // 15 phút
     windowMs: 15 * 60 * 1000,
 
-    // Tối đa 100 request / IP
-    max: 100,
+    // Dev: 2000 req để tránh bị chặn bởi Socket.IO polling + HMR
+    // Production: 100 req / IP
+    max: isDev ? 2000 : 100,
 
     // Response khi vượt quá giới hạn
     message: {
@@ -28,13 +31,16 @@ export const rateLimiter = rateLimit({
 export const authLimiter = rateLimit({
     // 1 giờ
     windowMs: 60 * 60 * 1000,
-    max: 5,
+
+    // Dev: bỏ giới hạn auth để test thoải mái
+    // Production: 5 lần / giờ / tài khoản
+    max: isDev ? 500 : 5,
 
     // Mặc định express-rate-limit key theo IP → mọi user cùng IP đều bị block chung.
     // Fix: key theo "IP + email" để mỗi tài khoản bị đếm riêng biệt.
     // ipKeyGenerator: helper chính thức của v8, xử lý chuẩn cả IPv4 lẫn IPv6
     keyGenerator: (req) => {
-        const ip = ipKeyGenerator(req);
+        const ip = ipKeyGenerator(req.ip || req.socket.remoteAddress || 'unknown');
         const email = (req.body?.email || 'unknown').toLowerCase().trim();
         return `${ip}:${email}`;
     },

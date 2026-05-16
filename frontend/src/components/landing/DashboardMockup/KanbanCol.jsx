@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { C } from "@/constants/brand";
 
 export default function KanbanCol({ title, count, dot, titleColor, countBg, countColor, cards }) {
   return (
@@ -39,4 +38,4 @@ export default function KanbanCol({ title, count, dot, titleColor, countBg, coun
       ))}
     </div>
   );
-}
+}

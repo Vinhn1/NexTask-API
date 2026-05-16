@@ -2,6 +2,7 @@ import AppError from "../../utils/appError";
 import { CreateCommentDto, UpdateCommentDto } from "./comment.dto";
 import prisma from "../../lib/prisma";
 import { getIO } from "../../lib/io";
+import { NotificationService } from "../notifications/notification.service";
 
 export class CommentService {
     // Tạo comment mới
@@ -13,7 +14,19 @@ export class CommentService {
             },
             select: {
                 id: true,
-                projectId: true
+                title: true,
+                projectId: true,
+                assigneeId: true,
+                project: {
+                    select: {
+                        ownerId: true,
+                        members: {
+                            select: {
+                                id: true
+                            }
+                        }
+                    }
+                }
             }
         });
 
@@ -40,10 +53,29 @@ export class CommentService {
             }
         });
 
+        // --- NOTIFICATION ---
+        const notificationRecipients = new Set<string>([
+            existingTask.project.ownerId,
+            existingTask.assigneeId || "",
+            ...existingTask.project.members.map(member => member.id)
+        ]);
+        notificationRecipients.delete("");
+        notificationRecipients.delete(userId);
+
+        await Promise.all([...notificationRecipients].map(recipientId =>
+            NotificationService.createNotification({
+                userId: recipientId,
+                type: "COMMENT_ADDED",
+                title: "Bình luận mới",
+                content: `${comment.user.fullname || "Thành viên"} đã bình luận trong: ${existingTask.title}`,
+                link: `/tasks?projectId=${existingTask.projectId}&taskId=${existingTask.id}`
+            })
+        ));
+
         // --- REAL-TIME (SOCKET.IO) ---
         const io = getIO();
         // Gửi thông báo đến toàn bộ project room
-        io.to(`project:${existingTask.projectId}`).emit("comment:new", {
+        io.to(`project:${existingTask.projectId}`).to(`task:${existingTask.id}`).emit("comment:new", {
             action: "comment_added",
             taskId: existingTask.id,
             comment: comment
@@ -72,7 +104,7 @@ export class CommentService {
             },
             // Sắp xếp comment mới nhất lên đầu
             orderBy: {
-                createdAt: 'desc'
+                createdAt: 'asc'
             },
 
             // Lấy thêm thông tin user viết comment
@@ -136,7 +168,7 @@ export class CommentService {
 
         // Real-time notification
         const io = getIO();
-        io.to(`project:${comment.task.projectId}`).emit("comment:updated", {
+        io.to(`project:${comment.task.projectId}`).to(`task:${comment.taskId}`).emit("comment:updated", {
             action: "comment_updated",
             taskId: comment.taskId,
             comment: updatedComment
@@ -178,7 +210,7 @@ export class CommentService {
 
         // Real-time notification
         const io = getIO();
-        io.to(`project:${comment.task.projectId}`).emit("comment:deleted", {
+        io.to(`project:${comment.task.projectId}`).to(`task:${comment.taskId}`).emit("comment:deleted", {
             action: "comment_deleted",
             taskId: comment.taskId,
             commentId: commentId

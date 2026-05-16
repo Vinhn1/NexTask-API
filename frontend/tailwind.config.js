@@ -51,7 +51,6 @@ export default {
         "surface-tint": "#494bd6",
         "surface-container-low": "#f5f2fe",
         "surface-container-highest": "#e4e1ed",
-        "surface": "#fcf8ff",
         "primary-fixed-dim": "#c0c1ff",
         "surface-dim": "#dbd8e4",
         "inverse-on-surface": "#f2effb",
@@ -59,14 +58,10 @@ export default {
         "on-background": "#1b1b23",
         "surface-variant": "#e4e1ed",
         "surface-container": "#efecf8",
-        "primary": "#4648d4",
         "on-secondary-fixed-variant": "#004e5c",
         "tertiary-fixed-dim": "#ffb783",
-        "on-tertiary-fixed": "#301400",
         "surface-bright": "#fcf8ff",
         "error": "#ba1a1a",
-        "on-tertiary-fixed": "#301400",
-        "on-secondary-container": "#006172",
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif']
@@ -94,4 +89,3 @@ export default {
   },
   plugins: [],
 }
-
