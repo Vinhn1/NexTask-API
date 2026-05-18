@@ -55,10 +55,10 @@
 
 **Mục tiêu:** Lưu trữ tài nguyên tĩnh (Avatar) bền vững.
 
-- [ ] **Cloudinary Integration**
+- [x] **Cloudinary Integration**
     - Backend: Cấu hình Cloudinary SDK và Multer.
     - Upload avatar người dùng lên cloud thay vì lưu local file.
-- [ ] **Profile Completion**
+- [x] **Profile Completion**
     - Kết nối trang Profile với API cập nhật thông tin.
     - Cho phép đổi Avatar, cập nhật Bio, Fullname.
 
