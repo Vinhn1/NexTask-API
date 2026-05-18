@@ -24,6 +24,10 @@ router.delete('/:id', protect, projectController.delete);
 // MEMBERS
 router.get('/:projectId/members', protect, projectController.getMembers);
 router.post('/:projectId/members', protect, validate(addMemberSchema), projectController.addMember);
+router.delete('/:projectId/members/:memberId', protect, projectController.removeMember);
 
 export default router;
+
+
+
 

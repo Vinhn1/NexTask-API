@@ -35,8 +35,15 @@ const projectService = {
   getMembers: async (projectId) => {
     const response = await api.get(`/projects/${projectId}/members`);
     return response.data;
+  },
+
+  // Xóa thành viên khỏi dự án
+  removeMember: async (projectId, memberId) => {
+    const response = await api.delete(`/projects/${projectId}/members/${memberId}`);
+    return response.data;
   }
 };
 
 
 export default projectService;
+

@@ -219,6 +219,44 @@ export class ProjectService {
             members: project.members
         };
     }
+
+    async removeMember(projectId: string, ownerId: string, memberId: string) {
+        const project = await prisma.project.findFirst({
+            where: { id: projectId, deletedAt: null },
+            include: { members: { select: { id: true } } }
+        });
+
+        if (!project) {
+            throw new AppError("Không tìm thấy dự án", 404);
+        }
+
+        if (project.ownerId !== ownerId) {
+            throw new AppError("Chỉ chủ sở hữu mới có quyền xóa thành viên", 403);
+        }
+
+        if (memberId === ownerId) {
+            throw new AppError("Bạn không thể tự xóa chính mình khỏi dự án", 400);
+        }
+
+        const isMember = project.members.some((m: { id: string }) => m.id === memberId);
+        if (!isMember) {
+            throw new AppError("Người dùng này không phải thành viên của dự án", 404);
+        }
+
+        const updatedProject = await prisma.project.update({
+            where: { id: projectId },
+            data: {
+                members: { disconnect: { id: memberId } }
+            },
+            include: {
+                members: {
+                    select: { id: true, fullname: true, email: true, avatar: true }
+                }
+            }
+        });
+
+        return updatedProject;
+    }
 }
 
 export const projectService = new ProjectService();

@@ -60,12 +60,12 @@ export class AuthController {
         try {
             const user = (req as any).user;
             if (!user) {
-                return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`);
+                return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3001'}/login?error=auth_failed`);
             }
 
             const tokens = authService.signTokens(user);
 
-            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/social-callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`);
+            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3001'}/social-callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`);
         } catch (error) {
             next(error);
         }

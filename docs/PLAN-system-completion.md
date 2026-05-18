@@ -39,14 +39,15 @@
 
 **Mục tiêu:** Xây dựng quy trình mời thành viên chuyên nghiệp và bảo mật.
 
-- [ ] **Trang Đội nhóm (Team Page)**
+- [x] **Trang Đội nhóm (Team Page)**
     - Hiển thị danh sách thành viên trong dự án hiện tại.
-    - Phân quyền (Owner, Member, Viewer).
-- [ ] **Hệ thống Lời mời (Invitation System)**
-    - **Logic**: Thay vì thêm trực tiếp, hệ thống sẽ lưu vào bảng `ProjectInvitation` trạng thái `PENDING`.
-    - **Email**: Gửi thông báo mời tham gia vào email người dùng.
-    - **Accept Flow**: Người dùng click vào link trong email -> Đăng nhập (nếu chưa) -> Chấp nhận/Từ chối lời mời.
-    - Chỉ sau khi chấp nhận mới chính thức được thêm vào dự án.
+    - Phân quyền Owner (Trưởng nhóm - toàn quyền) và Member (Biên tập viên).
+    - Xóa thành viên với confirm dialog (chỉ Owner).
+- [x] **Thêm thành viên trực tiếp (Option A)**
+    - Chỉ cho phép thêm email đã có tài khoản trên hệ thống.
+    - Nếu email chưa tồn tại, backend trả về lỗi rõ ràng.
+    - API: `POST /projects/:id/members` + `DELETE /projects/:id/members/:memberId`.
+
 
 ---
 

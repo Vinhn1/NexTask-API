@@ -125,4 +125,21 @@ export class ProjectController {
             next(error);
         }
     }
+
+    async removeMember(req: Request, res: Response, next: NextFunction) {
+        try {
+            const projectId = req.params.projectId as string;
+            const memberId = req.params.memberId as string;
+            const ownerId = req.user!.id;
+
+            const project = await projectService.removeMember(projectId, ownerId, memberId);
+
+            res.status(200).json({
+                status: 'success',
+                data: { project }
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

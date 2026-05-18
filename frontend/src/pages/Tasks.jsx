@@ -162,8 +162,9 @@ export default function Tasks() {
     fetchTasks();
   }, [fetchTasks]);
 
-  const handleTaskCreated = (newTask) => {
-    setTasks(prev => sortTasksByPosition([...prev, newTask]));
+  const handleTaskCreated = () => {
+    // Không cập nhật state trực tiếp ở đây.
+    // Socket event "task:created" sẽ là nguồn sự thật duy nhất để tránh duplicate.
     setIsTaskFormOpen(false);
   };
 

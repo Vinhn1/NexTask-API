@@ -46,8 +46,8 @@ export default function TaskForm({ isOpen, onClose, projectId, onTaskCreated, pr
         return;
       }
 
-      const res = await taskService.createTask(submissionData);
-      onTaskCreated(res.data);
+      await taskService.createTask(submissionData);
+      onTaskCreated(); // State update is handled by socket "task:created" event
       onClose();
       setFormData({
         title: "",
