@@ -11,6 +11,8 @@
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-010101?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 
+[![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-nex--task--api--frontend.vercel.app-black?style=for-the-badge&logo=vercel)](https://nex-task-api-frontend.vercel.app)
+
 *Built as a personal full-stack project to master modern web architecture — real-time sync, secure auth, clean API design.*
 
 <br/>
@@ -302,12 +304,12 @@ Each domain (auth, tasks, projects, …) owns its own `controller`, `service`, `
 
 ## 🗺️ Roadmap
 
+- [x] Deploy to Vercel (frontend) + Render (backend)
 - [ ] Redis integration for session caching & rate limit storage
 - [ ] Task filtering & sorting (assignee, priority, due date)
 - [ ] Subtasks / checklists
 - [ ] Email notification digests
 - [ ] CI/CD pipeline with GitHub Actions
-- [ ] Deploy to Railway / Render
 
 ---
 
