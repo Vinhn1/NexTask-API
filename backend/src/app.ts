@@ -22,7 +22,25 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use('/public', express.static(path.join(__dirname, '../public')));
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3001',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any vercel.app subdomain
+    if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(helmet());
 app.use(rateLimiter);
 app.use(passport.initialize());

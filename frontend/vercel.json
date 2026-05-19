@@ -1,18 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "https://nextask-api-aqud.onrender.com/api/v1/:path*"
-    },
-    {
-      "source": "/images/:path*",
-      "destination": "https://nextask-api-aqud.onrender.com/images/:path*"
-    },
-    {
-      "source": "/socket.io/:path*",
-      "destination": "https://nextask-api-aqud.onrender.com/socket.io/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
