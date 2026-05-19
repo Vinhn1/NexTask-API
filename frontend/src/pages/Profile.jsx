@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import { useAuth } from "../contexts/AuthContext";
@@ -7,6 +8,10 @@ import userService from "../services/userService";
 
 export default function Profile() {
   const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // ProtectedRoute redirect về '/' khi user=null → tự động về trang chủ
+  const handleLogout = () => logout();
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -117,7 +122,7 @@ export default function Profile() {
           </div>
           <button
             type="button"
-            onClick={logout}
+            onClick={handleLogout}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#ffdad6] text-[#93000a] bg-white hover:bg-[#fff0f0] font-bold transition-colors"
           >
             <span className="material-symbols-rounded text-[20px]">logout</span>

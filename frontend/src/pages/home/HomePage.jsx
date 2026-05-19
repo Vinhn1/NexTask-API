@@ -4,6 +4,7 @@ import { Stats } from "./Stats";
 import Features from "./Features";
 import { HowItWorks } from "./HowItWorks";
 import Pricing from "./Pricing";
+import AboutUs from "./AboutUs";
 import { Testimonials, CTABanner, Footer } from "./Sections";
 
 export default function HomePage() {
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Features />
       <HowItWorks />
       <Pricing />
+      <AboutUs />
       <Testimonials />
       <CTABanner />
       <Footer />

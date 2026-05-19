@@ -14,7 +14,7 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <section className="py-24 px-8 bg-white mx-8 my-12 rounded-[24px] border border-border">
+    <section id="testimonials" className="py-24 px-8 bg-white mx-8 my-12 rounded-[24px] border border-border">
       <div className="text-center mb-12">
         <SectionLabel>Từ người dùng</SectionLabel>
         <h2 className="text-4xl font-black tracking-tight">Được yêu thích bởi các team</h2>

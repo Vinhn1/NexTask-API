@@ -1,9 +1,22 @@
 import { Link } from "react-router-dom";
 import { BtnPrimary } from "@/components/ui/Button";
 
-const NAV_LINKS = ["Tính năng", "Bảng giá", "Tài liệu", "Blog"];
+const NAV_LINKS = [
+  { label: "Tính năng", href: "#features" },
+  { label: "Bảng giá",  href: "#pricing"  },
+  { label: "Về chúng tôi", href: "#about" },
+  { label: "Testimonials", href: "#testimonials" },
+];
 
 export default function Navbar() {
+  const handleScroll = (e, href) => {
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-[100] bg-surface/88 backdrop-blur-xl border-b border-border px-8 h-16 flex items-center justify-between">
       {/* Logo */}
@@ -16,13 +29,14 @@ export default function Navbar() {
 
       {/* Nav links */}
       <div className="flex items-center gap-7 text-[14px] font-semibold">
-        {NAV_LINKS.map(l => (
-          <a 
-            key={l} 
-            href="#" 
+        {NAV_LINKS.map(({ label, href }) => (
+          <a
+            key={label}
+            href={href}
+            onClick={(e) => handleScroll(e, href)}
             className="text-muted no-underline transition-colors duration-150 hover:text-primary"
           >
-            {l}
+            {label}
           </a>
         ))}
       </div>
@@ -39,4 +53,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

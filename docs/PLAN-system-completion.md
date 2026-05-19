@@ -68,11 +68,11 @@
 
 **Mục tiêu:** Xây dựng bộ mặt chuyên nghiệp cho ứng dụng.
 
-- [ ] **Xây dựng các Section tại Home Page**
+- [x] **Xây dựng các Section tại Home Page**
     - **Features**: Giới thiệu các tính năng nổi bật.
     - **Pricing**: Bảng giá các gói dịch vụ.
     - **About Us**: Thông tin về đội ngũ/sản phẩm.
-- [ ] **Navbar Navigation**: Kết nối các menu trên Navbar Home đến đúng các section hoặc trang tương ứng.
+- [x] **Navbar Navigation**: Kết nối các menu trên Navbar Home đến đúng các section hoặc trang tương ứng.
 
 ---
 

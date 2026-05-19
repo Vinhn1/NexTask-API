@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import commentService from '../../services/commentService';
+import attachmentService from '../../services/attachmentService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
 import taskService from '../../services/taskService';
@@ -10,7 +11,10 @@ const sortCommentsByCreatedAt = (commentList) =>
 
 export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete, onTaskUpdate }) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('comments'); // 'activity', 'subtasks', 'attachments', 'comments'
+  const [activeTab, setActiveTab] = useState('comments'); // 'attachments', 'comments'
+  const [attachments, setAttachments] = useState([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
@@ -225,9 +229,122 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
   if (!task) return null;
   const status = getTaskStatus(task.status);
 
+  // Load attachments khi mở tab
+  useEffect(() => {
+    if (activeTab !== 'attachments' || !taskId) return;
+    attachmentService.getAttachments(taskId)
+      .then(res => setAttachments(res.data || []))
+      .catch(console.error);
+  }, [activeTab, taskId]);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFile(true);
+    try {
+      const res = await attachmentService.uploadAttachment(taskId, file);
+      setAttachments(prev => [res.data, ...prev]);
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Upload thất bại');
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Xóa tài liệu này?')) return;
+    try {
+      await attachmentService.deleteAttachment(taskId, attachmentId);
+      setAttachments(prev => prev.filter(a => a.id !== attachmentId));
+    } catch (err) {
+      alert('Không thể xóa tài liệu');
+    }
+  };
+
+  const handleViewAttachment = (fileUrl, fileName, fileType) => {
+    // File Office → Google Docs Viewer
+    const isOffice =
+      fileType?.includes('word') || fileType?.includes('excel') ||
+      fileType?.includes('spreadsheet') || fileType?.includes('officedocument') ||
+      fileType?.includes('presentation') || /\.(docx?|xlsx?|pptx?)$/i.test(fileName);
+
+    if (isOffice) {
+      window.open(`https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=false`, '_blank');
+      return;
+    }
+
+    // PDF, ảnh → mở URL gốc trực tiếp (không dùng transformation flag → không bị 401)
+    window.open(fileUrl, '_blank');
+  };
+
+  const handleDownloadAttachment = async (e, attachmentId, fileName) => {
+    if (e) e.preventDefault();
+
+    try {
+      // Tải qua backend proxy — server fetch Cloudinary, không bị 401 hay CORS
+      const blob = await attachmentService.proxyFile(task.id, attachmentId, 'download');
+
+      // File System Access API — hiện dialog chọn thư mục lưu
+      if (typeof window.showSaveFilePicker === 'function') {
+        try {
+          const ext = fileName.split('.').pop()?.toLowerCase();
+          const mimeMap = {
+            pdf: 'application/pdf',
+            png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+            gif: 'image/gif', webp: 'image/webp',
+            doc: 'application/msword',
+            docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            xls: 'application/vnd.ms-excel',
+            xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            txt: 'text/plain',
+          };
+          const fileHandle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'Tệp tải xuống',
+              accept: { [mimeMap[ext] || blob.type || 'application/octet-stream']: [`.${ext}`] },
+            }],
+          });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return;
+        } catch (pickerErr) {
+          if (pickerErr.name === 'AbortError') return;
+        }
+      }
+
+      // Fallback: blob URL → click download
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert('Không thể tải file. Vui lòng thử lại.');
+    }
+  };
+
+  const getFileIcon = (fileType) => {
+    if (fileType.startsWith('image')) return 'image';
+    if (fileType === 'application/pdf') return 'picture_as_pdf';
+    if (fileType.includes('word')) return 'description';
+    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'table_chart';
+    return 'attach_file';
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
   const tabs = [
-    { id: 'activity', label: 'Hoạt động', icon: 'history' },
-    { id: 'subtasks', label: 'Việc phụ', icon: 'checklist' },
     { id: 'attachments', label: 'Tài liệu', icon: 'attach_file' },
     { id: 'comments', label: 'Bình luận', icon: 'chat_bubble' },
   ];
@@ -522,10 +639,76 @@ export default function TaskDetailSidebar({ task, onClose, project, onTaskDelete
                   <div ref={commentsEndRef} />
                 </div>
               )}
-              {activeTab !== 'comments' && (
-                <div className="flex flex-col items-center justify-center py-24 gap-6 opacity-50 grayscale">
-                  <span className="material-symbols-rounded text-[56px] text-[#e4e1ed]">construction</span>
-                  <p className="font-bold text-[#767586] text-lg">Tính năng này đang được phát triển</p>
+              {activeTab === 'attachments' && (
+                <div className="space-y-5">
+                  {/* Upload button */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-[24px] p-8 flex flex-col items-center gap-3 cursor-pointer transition-all ${
+                      uploadingFile ? 'border-[#4648d4] bg-[#f0efff]' : 'border-[#e4e1ed] hover:border-[#4648d4] hover:bg-[#fcf8ff]'
+                    }`}
+                  >
+                    {uploadingFile ? (
+                      <span className="material-symbols-rounded text-[36px] text-[#4648d4] animate-spin">refresh</span>
+                    ) : (
+                      <span className="material-symbols-rounded text-[36px] text-[#a1a0af]">cloud_upload</span>
+                    )}
+                    <div className="text-center">
+                      <p className="font-black text-[#1b1b23] text-sm">{uploadingFile ? 'Đang tải lên...' : 'Nhấp để chọn file'}</p>
+                      <p className="text-[12px] text-[#a1a0af] mt-1">Ảnh, PDF, Word, Excel — tối đa 20MB</p>
+                    </div>
+                  </div>
+                  <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload}
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" />
+
+                  {/* Attachment list */}
+                  {attachments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
+                      <div className="w-16 h-16 bg-[#fcf8ff] rounded-[24px] flex items-center justify-center">
+                        <span className="material-symbols-rounded text-[32px] text-[#e4e1ed]">folder_open</span>
+                      </div>
+                      <p className="text-[13px] font-bold text-[#a1a0af]">Chưa có tài liệu nào</p>
+                    </div>
+                  ) : (
+                    attachments.map(att => (
+                      <div key={att.id} className="flex items-center gap-4 p-4 bg-white rounded-[20px] border border-[#f2effb] hover:shadow-md transition-all group">
+                        <div className="w-12 h-12 rounded-2xl bg-[#f0efff] flex items-center justify-center text-[#4648d4] flex-shrink-0">
+                          <span className="material-symbols-rounded text-[24px]">{getFileIcon(att.fileType)}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-black text-[#1b1b23] text-[14px] truncate">{att.fileName}</p>
+                          <p className="text-[11px] text-[#a1a0af] font-semibold mt-0.5">
+                            {formatFileSize(att.fileSize)} · {att.uploader?.fullname || 'Thành viên'} · {new Date(att.createdAt).toLocaleDateString('vi-VN')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {/* Xem trực tiếp */}
+                          <button onClick={() => handleViewAttachment(att.fileUrl, att.fileName, att.fileType)}
+                            title="Xem tài liệu"
+                            className="w-9 h-9 flex items-center justify-center text-[#767586] hover:bg-[#f0efff] hover:text-[#4648d4] rounded-xl transition-all"
+                          >
+                            <span className="material-symbols-rounded text-[20px]">visibility</span>
+                          </button>
+                          {/* Tải về máy */}
+                          <button
+                            onClick={(e) => handleDownloadAttachment(e, att.id, att.fileName)}
+                            title="Tải về máy"
+                            className="w-9 h-9 flex items-center justify-center text-[#767586] hover:bg-[#fcf8ff] hover:text-[#4648d4] rounded-xl transition-all"
+                          >
+                            <span className="material-symbols-rounded text-[20px]">download</span>
+                          </button>
+                          {att.uploadedBy === user?.id && (
+                            <button onClick={() => handleDeleteAttachment(att.id)}
+                              title="Xóa tài liệu"
+                              className="w-9 h-9 flex items-center justify-center text-[#767586] hover:bg-[#fff0f0] hover:text-[#93000a] rounded-xl transition-all"
+                            >
+                              <span className="material-symbols-rounded text-[20px]">delete</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
             </div>

@@ -5,7 +5,7 @@ import { PricingTier } from "@/components/landing/LandingParts";
 
 export default function Pricing() {
   return (
-    <section className="py-24 px-8">
+    <section id="pricing" className="py-24 px-8">
       <div className="text-center mb-12">
         <SectionLabel>Bảng giá</SectionLabel>
         <h2 className="text-4xl font-black tracking-tight">Minh bạch, không bất ngờ</h2>
