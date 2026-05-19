@@ -9,7 +9,7 @@ import AppError from '../../utils/appError';
 // GET /api/v1/tasks/:taskId/attachments
 export const getAttachments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { taskId } = req.params;
+        const { taskId } = req.params as { taskId: string };
 
         const task = await prisma.task.findUnique({ where: { id: taskId } });
         if (!task) return next(new AppError('Task không tồn tại', 404));
@@ -29,7 +29,7 @@ export const getAttachments = async (req: Request, res: Response, next: NextFunc
 // POST /api/v1/tasks/:taskId/attachments
 export const uploadAttachmentHandler = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { taskId } = req.params;
+        const { taskId } = req.params as { taskId: string };
         const userId = (req as any).user?.id;
 
         if (!req.file) return next(new AppError('Không có file nào được upload', 400));
@@ -61,7 +61,7 @@ export const uploadAttachmentHandler = async (req: Request, res: Response, next:
 // DELETE /api/v1/tasks/:taskId/attachments/:attachmentId
 export const deleteAttachment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { attachmentId } = req.params;
+        const { attachmentId } = req.params as { attachmentId: string };
         const userId = (req as any).user?.id;
 
         const attachment = await prisma.attachment.findUnique({ where: { id: attachmentId } });
@@ -91,7 +91,7 @@ export const deleteAttachment = async (req: Request, res: Response, next: NextFu
 // GET /api/v1/tasks/:taskId/attachments/:attachmentId/proxy?mode=view|download
 export const proxyAttachment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { attachmentId } = req.params;
+        const { attachmentId } = req.params as { attachmentId: string };
         const disposition = req.query.mode === 'view' ? 'inline' : 'attachment';
 
         const attachment = await prisma.attachment.findUnique({ where: { id: attachmentId } });

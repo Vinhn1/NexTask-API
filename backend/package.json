@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
+    "build": "tsc",
+    "postbuild": "prisma generate",
+    "start": "node dist/server.js",
     "test": "jest --watchAll --no-cache"
   },
   "keywords": [],
