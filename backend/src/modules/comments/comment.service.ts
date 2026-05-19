@@ -57,7 +57,7 @@ export class CommentService {
         const notificationRecipients = new Set<string>([
             existingTask.project.ownerId,
             existingTask.assigneeId || "",
-            ...existingTask.project.members.map(member => member.id)
+            ...existingTask.project.members.map((member: { id: string }) => member.id)
         ]);
         notificationRecipients.delete("");
         notificationRecipients.delete(userId);

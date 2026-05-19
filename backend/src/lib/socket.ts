@@ -78,7 +78,7 @@ export const initSocket = (httpServer: any) => {
                 select: { id: true },
             });
 
-            projects.forEach((p) => {
+            projects.forEach((p: { id: string }) => {
                 socket.join(`project:${p.id}`);
                 console.log(`User ${userId} joined room project:${p.id}`);
             });

@@ -17,9 +17,9 @@
 
 | | |
 |:---:|:---:|
-| ![Landing Page](docs/screenshots/01-landing.png) | ![Dashboard Overview](docs/screenshots/02-dashboard.png) |
+| ![Landing Page](docs/screenshots/landing.png) | ![Dashboard Overview](docs/screenshots/dashboard.png) |
 | **Landing Page** — Hero section & navigation | **Dashboard** — Stats cards, recent tasks & calendar |
-| ![Kanban Board](docs/screenshots/03-kanban.png) | ![Task Comments](docs/screenshots/04-comments.png) |
+| ![Kanban Board](docs/screenshots/kanban.png) | ![Task Comments](docs/screenshots/comments.png) |
 | **Kanban Board** — Drag & drop across columns | **Task Detail** — Real-time comment sidebar |
 
 </div>
