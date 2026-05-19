@@ -2,7 +2,7 @@
 // Quản lý user + token
 import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import api from "../services/api";
 
 const AuthContext = createContext();
 
@@ -19,11 +19,7 @@ export function AuthProvider({ children }){
         const token = localStorage.getItem('accessToken');
 
         if(token){
-            axios.get('/api/v1/auth/me', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            api.get('/auth/me')
             .then(res => setUser(res.data.data.user))
             .catch(() => localStorage.removeItem('accessToken'))
             .finally(() => setLoading(false));
@@ -36,7 +32,7 @@ export function AuthProvider({ children }){
     // HÀM ĐĂNG NHẬP
     const login = async (email, password) => {
         try {
-            const res = await axios.post('/api/v1/auth/login', { email, password });
+            const res = await api.post('/auth/login', { email, password });
             localStorage.setItem('accessToken', res.data.data.accessToken);
             localStorage.setItem('refreshToken', res.data.data.refreshToken);
             setUser(res.data.data.user);
@@ -49,7 +45,7 @@ export function AuthProvider({ children }){
     // HÀM ĐĂNG KÝ
     const register = async (fullname, email, password) => {
         try {
-            const res = await axios.post('/api/v1/auth/register', { fullname, email, password });
+            const res = await api.post('/auth/register', { fullname, email, password });
             if (res.data.data.accessToken) {
                 localStorage.setItem('accessToken', res.data.data.accessToken);
                 localStorage.setItem('refreshToken', res.data.data.refreshToken);
@@ -88,11 +84,7 @@ export function AuthProvider({ children }){
         localStorage.setItem('refreshToken', refreshToken);
         
         try {
-            const res = await axios.get('/api/v1/auth/me', {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+            const res = await api.get('/auth/me');
             setUser(res.data.data.user);
         } catch (error) {
             console.error("Token Login Error:", error);

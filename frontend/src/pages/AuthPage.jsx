@@ -56,8 +56,11 @@ export const AuthPage = () => {
     };
 
     const handleSocialLogin = (provider) => {
-        // Sử dụng đường dẫn tương đối để tận dụng Proxy đã cấu hình trong vite.config.js
-        window.location.href = `/api/v1/auth/${provider}`;
+        // Trong môi trường production, redirect thẳng tới backend trên Render. Trong dev, dùng localhost:3000
+        const backendUrl = import.meta.env.PROD 
+            ? 'https://nextask-api-aqud.onrender.com' 
+            : 'http://localhost:3000';
+        window.location.href = `${backendUrl}/api/v1/auth/${provider}`;
     };
 
     return (
